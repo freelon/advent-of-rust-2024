@@ -15,10 +15,7 @@ fn part1(input: &str) -> Int {
     l.sort();
     r.sort();
 
-    l.into_iter()
-        .zip(r.into_iter())
-        .map(|(l, r)| (l - r).abs())
-        .sum()
+    l.into_iter().zip(r).map(|(l, r)| (l - r).abs()).sum()
 }
 
 fn part2(input: &str) -> Int {
