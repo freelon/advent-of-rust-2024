@@ -27,6 +27,7 @@ mod test {
     fn test1() {
         assert_eq!(part1(TEST_INPUT), 0);
     }
+
     #[test]
     fn test2() {
         assert_eq!(part2(TEST_INPUT), 0);
