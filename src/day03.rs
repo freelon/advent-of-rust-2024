@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use std::fs::read_to_string;
 
 pub fn day_main() {
@@ -21,50 +20,24 @@ fn part1(input: &str) -> RiddleResult {
         .sum()
 }
 
-enum Statement {
-    Enable,
-    Disable,
-    Number(i64),
-}
-
 fn part2(input: &str) -> RiddleResult {
     let r = regex::Regex::new(r"do\(\)|don't\(\)|mul\((\d{1,3}),(\d{1,3})\)").unwrap();
-    let statements = r
-        .captures_iter(input)
-        .map(|c| {
+    r.captures_iter(input)
+        // (enabled, result): initially enabled; sum up the result over all enabled multiplications
+        .fold((true, 0), |(enabled, result), c| {
             let s = c.get(0).unwrap().as_str();
 
             match s {
-                "do()" => Statement::Enable,
-                "don't()" => Statement::Disable,
+                "do()" => (true, result),
+                "don't()" => (false, result),
                 _ => {
                     let a: i64 = c.get(1).unwrap().as_str().parse().unwrap();
                     let b: i64 = c.get(2).unwrap().as_str().parse().unwrap();
-                    Statement::Number(a * b)
+                    (enabled, result + if enabled { a * b } else { 0 })
                 }
             }
         })
-        .collect_vec();
-
-    let mut enabled = true;
-    let mut result = 0;
-    for f in statements {
-        match f {
-            Statement::Enable => {
-                enabled = true;
-            }
-            Statement::Disable => {
-                enabled = false;
-            }
-            Statement::Number(i) => {
-                if enabled {
-                    result += i
-                }
-            }
-        }
-    }
-
-    result
+        .1
 }
 
 #[cfg(test)]
