@@ -11,15 +11,11 @@ pub fn day_main() {
 type RiddleResult = i64;
 
 fn part1(input: &str) -> RiddleResult {
-    let r = regex::Regex::new(r"mul\(\d{1,3},\d{1,3}\)").unwrap();
+    let r = regex::Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
     r.captures_iter(input)
         .map(|c| {
-            let s = c.get(0).unwrap().as_str();
-            println!("{s}");
-            let x = s.strip_prefix("mul(").unwrap().strip_suffix(")").unwrap();
-            let (a, b) = x.split_once(',').unwrap();
-            let a: i64 = a.parse().unwrap();
-            let b: i64 = b.parse().unwrap();
+            let a: i64 = c.get(1).unwrap().as_str().parse().unwrap();
+            let b: i64 = c.get(2).unwrap().as_str().parse().unwrap();
             a * b
         })
         .sum()
@@ -32,21 +28,18 @@ enum Statement {
 }
 
 fn part2(input: &str) -> RiddleResult {
-    let r = regex::Regex::new(r"do\(\)|don't\(\)|mul\(\d{1,3},\d{1,3}\)").unwrap();
+    let r = regex::Regex::new(r"do\(\)|don't\(\)|mul\((\d{1,3}),(\d{1,3})\)").unwrap();
     let statements = r
         .captures_iter(input)
         .map(|c| {
             let s = c.get(0).unwrap().as_str();
-            println!("{s}");
 
             match s {
                 "do()" => Statement::Enable,
                 "don't()" => Statement::Disable,
                 _ => {
-                    let x = s.strip_prefix("mul(").unwrap().strip_suffix(")").unwrap();
-                    let (a, b) = x.split_once(',').unwrap();
-                    let a: i64 = a.parse().unwrap();
-                    let b: i64 = b.parse().unwrap();
+                    let a: i64 = c.get(1).unwrap().as_str().parse().unwrap();
+                    let b: i64 = c.get(2).unwrap().as_str().parse().unwrap();
                     Statement::Number(a * b)
                 }
             }
