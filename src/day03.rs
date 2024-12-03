@@ -13,8 +13,8 @@ fn part1(input: &str) -> RiddleResult {
     let r = regex::Regex::new(r"mul\((\d{1,3}),(\d{1,3})\)").unwrap();
     r.captures_iter(input)
         .map(|c| {
-            let a: i64 = c.get(1).unwrap().as_str().parse().unwrap();
-            let b: i64 = c.get(2).unwrap().as_str().parse().unwrap();
+            let a: i64 = c[1].parse().unwrap();
+            let b: i64 = c[2].parse().unwrap();
             a * b
         })
         .sum()
@@ -31,8 +31,8 @@ fn part2(input: &str) -> RiddleResult {
                 "do()" => (true, result),
                 "don't()" => (false, result),
                 _ => {
-                    let a: i64 = c.get(1).unwrap().as_str().parse().unwrap();
-                    let b: i64 = c.get(2).unwrap().as_str().parse().unwrap();
+                    let a: i64 = c[1].parse().unwrap();
+                    let b: i64 = c[2].parse().unwrap();
                     (enabled, result + if enabled { a * b } else { 0 })
                 }
             }
