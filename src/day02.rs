@@ -4,8 +4,8 @@ use itertools::Itertools;
 
 pub fn day_main() {
     let input = read_to_string("input/day02.txt").unwrap();
-    println!("part1: {}", part1(&input));
-    println!("part2: {}", part2(&input));
+    println!(" part1: {}", part1(&input));
+    println!(" part2: {}", part2(&input));
 }
 
 fn part1(input: &str) -> usize {

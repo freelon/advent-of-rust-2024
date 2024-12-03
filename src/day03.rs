@@ -3,8 +3,8 @@ use std::fs::read_to_string;
 pub fn day_main() {
     let input = read_to_string("input/day03.txt").unwrap();
     let input = input.trim();
-    println!("part1: {}", part1(input));
-    println!("part2: {}", part2(input));
+    println!(" part1: {}", part1(input));
+    println!(" part2: {}", part2(input));
 }
 
 type RiddleResult = i64;
