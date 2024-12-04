@@ -62,8 +62,39 @@ fn diags(m: &HashMap<(usize, usize), char>) -> usize {
     count
 }
 
-fn part2(_input: &str) -> RiddleResult {
-    0
+fn part2(input: &str) -> RiddleResult {
+    let mut puzzle = HashMap::<(usize, usize), char>::new();
+    input.lines().enumerate().for_each(|(y, line)| {
+        line.chars().enumerate().for_each(|(x, chr)| {
+            puzzle.insert((x, y), chr);
+        })
+    });
+    let mut count = 0;
+    let xmax = puzzle.keys().map(|k| k.0).max().unwrap();
+    let ymax = puzzle.keys().map(|k| k.1).max().unwrap();
+    for sx in 1..xmax {
+        for sy in 1..ymax {
+            let first = [
+                puzzle[&(sx - 1, sy - 1)],
+                puzzle[&(sx, sy)],
+                puzzle[&(sx + 1, sy + 1)],
+            ]
+            .into_iter()
+            .join("");
+            let second = [
+                puzzle[&(sx - 1, sy + 1)],
+                puzzle[&(sx, sy)],
+                puzzle[&(sx + 1, sy - 1)],
+            ]
+            .into_iter()
+            .join("");
+            if (first == "MAS" || first == "SAM") && (second == "SAM" || second == "MAS") {
+                count += 1;
+            }
+        }
+    }
+
+    count
 }
 
 #[cfg(test)]
@@ -89,6 +120,6 @@ MXMXAXMASX
 
     #[test]
     fn test2() {
-        assert_eq!(part2(TEST_INPUT), 0);
+        assert_eq!(part2(TEST_INPUT), 9);
     }
 }
