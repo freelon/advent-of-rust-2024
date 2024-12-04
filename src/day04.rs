@@ -12,26 +12,13 @@ pub fn day_main() {
 type RiddleResult = usize;
 
 fn part1(input: &str) -> RiddleResult {
-    let mut puzzle = HashMap::<(usize, usize), char>::new();
-    input.lines().enumerate().for_each(|(y, line)| {
-        line.chars().enumerate().for_each(|(x, chr)| {
-            puzzle.insert((x, y), chr);
-        })
-    });
-
-    diags(&puzzle)
-    // 2023 wrong
-}
-
-fn diags(m: &HashMap<(usize, usize), char>) -> usize {
+    let puzzle = parse_map(input);
     let mut count = 0;
-    let xmax = m.keys().map(|k| k.0).max().unwrap();
-    let ymax = m.keys().map(|k| k.1).max().unwrap();
-    println!("{xmax},{ymax}");
-    let S = "XMAS".chars().collect_vec();
+    let x_max = puzzle.keys().map(|k| k.0).max().unwrap();
+    let y_max = puzzle.keys().map(|k| k.1).max().unwrap();
 
-    for sx in 0..=xmax {
-        for sy in 0..=ymax {
+    for sx in 0..=x_max {
+        for sy in 0..=y_max {
             'foo: for (a, b) in [
                 (1, 1),
                 (-1, 1),
@@ -42,18 +29,17 @@ fn diags(m: &HashMap<(usize, usize), char>) -> usize {
                 (0, -1),
                 (-1, 0),
             ] {
-                for (i, c) in S.iter().enumerate() {
+                for (i, c) in "XMAS".chars().enumerate() {
                     let i = i as i32;
                     let p = (sx as i32 + i * a, sy as i32 + i * b);
-                    if p.0 < 0 || p.1 < 0 || p.0 > xmax as i32 || p.1 > ymax as i32 {
+                    if p.0 < 0 || p.1 < 0 || p.0 > x_max as i32 || p.1 > y_max as i32 {
                         continue 'foo;
                     }
 
-                    if m[&(p.0 as usize, p.1 as usize)] != *c {
+                    if puzzle[&(p.0 as usize, p.1 as usize)] != c {
                         continue 'foo;
                     }
                 }
-                println!("found from {sx},{sy} ({a},{b})");
                 count += 1;
             }
         }
@@ -63,17 +49,12 @@ fn diags(m: &HashMap<(usize, usize), char>) -> usize {
 }
 
 fn part2(input: &str) -> RiddleResult {
-    let mut puzzle = HashMap::<(usize, usize), char>::new();
-    input.lines().enumerate().for_each(|(y, line)| {
-        line.chars().enumerate().for_each(|(x, chr)| {
-            puzzle.insert((x, y), chr);
-        })
-    });
+    let puzzle = parse_map(input);
     let mut count = 0;
-    let xmax = puzzle.keys().map(|k| k.0).max().unwrap();
-    let ymax = puzzle.keys().map(|k| k.1).max().unwrap();
-    for sx in 1..xmax {
-        for sy in 1..ymax {
+    let x_max = puzzle.keys().map(|k| k.0).max().unwrap();
+    let y_max = puzzle.keys().map(|k| k.1).max().unwrap();
+    for sx in 1..x_max {
+        for sy in 1..y_max {
             let first = [
                 puzzle[&(sx - 1, sy - 1)],
                 puzzle[&(sx, sy)],
@@ -95,6 +76,16 @@ fn part2(input: &str) -> RiddleResult {
     }
 
     count
+}
+
+fn parse_map(input: &str) -> HashMap<(usize, usize), char> {
+    let mut puzzle = HashMap::<(usize, usize), char>::new();
+    input.lines().enumerate().for_each(|(y, line)| {
+        line.chars().enumerate().for_each(|(x, chr)| {
+            puzzle.insert((x, y), chr);
+        })
+    });
+    puzzle
 }
 
 #[cfg(test)]
