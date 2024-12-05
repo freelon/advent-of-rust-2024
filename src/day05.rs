@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use std::fs::read_to_string;
+use std::{cmp::Ordering, fs::read_to_string};
 
 pub fn day_main() {
     let input = read_to_string("input/day05.txt").unwrap();
@@ -15,9 +15,7 @@ fn part1(input: &str) -> RiddleResult {
     books.iter().filter(|book| {
         valid_book(book, &rules)
     })
-    .inspect(|v| println!("{v:?}"))
     .map(|book| book[book.len() / 2].parse::<RiddleResult>().unwrap())
-    .inspect(|v| println!("{v:?}"))
     .sum()
 }
 
@@ -41,7 +39,27 @@ fn parse(input: &str) -> (Vec<(&str, &str)>, Vec<Vec<&str>>) {
 }
 
 fn part2(input: &str) -> RiddleResult {
-    0
+    let (rules, books) = parse(input);
+    books.iter().filter(|book| {
+        !valid_book(book, &rules)
+    })
+    .map(|book| fix(book, &rules))
+    .map(|book| book[book.len() / 2].parse::<RiddleResult>().unwrap())
+    .sum()
+}
+
+fn  fix<'a>(book: &'a[&str], rules: &[(&str, &str)]) -> Vec<&'a str> {
+    let mut b = book.iter().copied().collect_vec();
+    b.sort_unstable_by(|a, b| {
+        if rules.contains(&(a, b)) {
+            Ordering::Less
+        } else if rules.contains(&(b, a)) {
+            Ordering::Greater
+        } else {
+            Ordering::Equal
+        }
+    });
+    b
 }
 
 #[cfg(test)]
@@ -89,6 +107,6 @@ mod test {
 
     #[test]
     fn test2() {
-//        assert_eq!(part2(TEST_INPUT), 9);
+        assert_eq!(part2(TEST_INPUT), 123);
     }
 }
