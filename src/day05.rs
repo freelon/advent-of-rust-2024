@@ -72,9 +72,7 @@ fn fix(book: &[R], rules: &[(R, R)]) -> Vec<R> {
 
 #[cfg(test)]
 mod test {
-    use crate::day05::valid_book;
-
-    use super::{part1, part2};
+    use super::{part1, part2, valid_book};
 
     const TEST_INPUT: &str = r"47|53
 97|13

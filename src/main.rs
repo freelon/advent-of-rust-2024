@@ -39,10 +39,9 @@ fn run(d: u8, f: &fn()) {
     let start = Instant::now();
     f();
     let duration = start.elapsed();
-    println!(
-        "{color}{italic}Took {duration:?}{reset_formatting}",
-        color = "\x1b[38;5;247m",
-        italic = "\x1b[3m",
-        reset_formatting = "\x1b[0m"
-    );
+    println!("{COLOR}{ITALIC}Took {duration:?}{RESET_FORMATTING}");
 }
+
+const COLOR: &str = "\x1b[38;5;247m";
+const ITALIC: &str = "\x1b[3m";
+const RESET_FORMATTING: &str = "\x1b[0m";
