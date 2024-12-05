@@ -1,4 +1,5 @@
 use itertools::Itertools;
+use std::collections::HashSet;
 use std::str::FromStr;
 use std::{cmp::Ordering, fs::read_to_string};
 
@@ -20,7 +21,7 @@ fn part1(input: &str) -> R {
         .sum()
 }
 
-fn valid_book(book: &[R], rules: &[(R, R)]) -> bool {
+fn valid_book(book: &[R], rules: &HashSet<(R, R)>) -> bool {
     for (i, a) in book.iter().enumerate() {
         for b in book.iter().skip(i + 1) {
             if rules.contains(&(*b, *a)) {
@@ -31,13 +32,13 @@ fn valid_book(book: &[R], rules: &[(R, R)]) -> bool {
     true
 }
 
-fn parse(input: &str) -> (Vec<(R, R)>, Vec<Vec<R>>) {
+fn parse(input: &str) -> (HashSet<(R, R)>, Vec<Vec<R>>) {
     let (a, b) = input.split_once("\n\n").unwrap();
     let rules = a
         .lines()
         .map(|line| line.split_once("|").unwrap())
         .map(|(a, b)| (R::from_str(a).unwrap(), R::from_str(b).unwrap()))
-        .collect_vec();
+        .collect();
     let books = b
         .lines()
         .map(|line| line.split(",").flat_map(R::from_str).collect_vec())
@@ -56,7 +57,7 @@ fn part2(input: &str) -> R {
         .sum()
 }
 
-fn fix(book: &[R], rules: &[(R, R)]) -> Vec<R> {
+fn fix(book: &[R], rules: &HashSet<(R, R)>) -> Vec<R> {
     let mut b = book.iter().copied().collect_vec();
     b.sort_unstable_by(|a, b| {
         if rules.contains(&(*a, *b)) {
@@ -73,6 +74,7 @@ fn fix(book: &[R], rules: &[(R, R)]) -> Vec<R> {
 #[cfg(test)]
 mod test {
     use super::{part1, part2, valid_book};
+    use std::collections::HashSet;
 
     const TEST_INPUT: &str = r"47|53
 97|13
@@ -106,8 +108,8 @@ mod test {
 
     #[test]
     fn test1() {
-        assert!(valid_book(&vec![97, 5, 13], &vec![(97, 13)]));
-        assert!(!valid_book(&vec![13, 5, 97], &vec![(97, 13)]));
+        assert!(valid_book(&vec![97, 5, 13], &HashSet::from([(97, 13)])));
+        assert!(!valid_book(&vec![13, 5, 97], &HashSet::from([(97, 13)])));
         assert_eq!(part1(TEST_INPUT), 143);
     }
 
