@@ -12,11 +12,11 @@ type RiddleResult = usize;
 
 fn part1(input: &str) -> RiddleResult {
     let (rules, books) = parse(input);
-    books.iter().filter(|book| {
-        valid_book(book, &rules)
-    })
-    .map(|book| book[book.len() / 2].parse::<RiddleResult>().unwrap())
-    .sum()
+    books
+        .iter()
+        .filter(|book| valid_book(book, &rules))
+        .map(|book| book[book.len() / 2].parse::<RiddleResult>().unwrap())
+        .sum()
 }
 
 fn valid_book(book: &[&str], rules: &[(&str, &str)]) -> bool {
@@ -32,23 +32,29 @@ fn valid_book(book: &[&str], rules: &[(&str, &str)]) -> bool {
 
 fn parse(input: &str) -> (Vec<(&str, &str)>, Vec<Vec<&str>>) {
     let (a, b) = input.split_once("\n\n").unwrap();
-    let rules = a.lines().map(|line| line.split_once("|").unwrap()).collect_vec();
-    let books = b.lines().map(|line| line.split(",").collect_vec()).collect_vec();
+    let rules = a
+        .lines()
+        .map(|line| line.split_once("|").unwrap())
+        .collect_vec();
+    let books = b
+        .lines()
+        .map(|line| line.split(",").collect_vec())
+        .collect_vec();
 
     (rules, books)
 }
 
 fn part2(input: &str) -> RiddleResult {
     let (rules, books) = parse(input);
-    books.iter().filter(|book| {
-        !valid_book(book, &rules)
-    })
-    .map(|book| fix(book, &rules))
-    .map(|book| book[book.len() / 2].parse::<RiddleResult>().unwrap())
-    .sum()
+    books
+        .iter()
+        .filter(|book| !valid_book(book, &rules))
+        .map(|book| fix(book, &rules))
+        .map(|book| book[book.len() / 2].parse::<RiddleResult>().unwrap())
+        .sum()
 }
 
-fn  fix<'a>(book: &'a[&str], rules: &[(&str, &str)]) -> Vec<&'a str> {
+fn fix<'a>(book: &'a [&str], rules: &[(&str, &str)]) -> Vec<&'a str> {
     let mut b = book.iter().copied().collect_vec();
     b.sort_unstable_by(|a, b| {
         if rules.contains(&(a, b)) {
