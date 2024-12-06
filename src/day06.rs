@@ -28,7 +28,6 @@ fn part1(input: &str) -> RiddleResult {
         });
     });
 
-    let mut result = 0;
     let mut pos = pos.unwrap();
     let mut dir = '^';
     let mut visited = HashSet::new();
@@ -36,7 +35,6 @@ fn part1(input: &str) -> RiddleResult {
         let (x, y) = pos;
         // println!("at {x},{y} {dir}");
         visited.insert(pos);
-        result += 1;
         let next = match dir {
             '^' => (x, y - 1),
             'v' => (x, y + 1),
@@ -60,8 +58,68 @@ fn part1(input: &str) -> RiddleResult {
     visited.len()
 }
 
-fn part2(_input: &str) -> RiddleResult {
-    0
+fn part2(input: &str) -> RiddleResult {
+    let mut m = HashMap::new();
+    let mut pos = None;
+    let mut opens = HashSet::new();
+    input.lines().enumerate().for_each(|(y, line)| {
+        line.char_indices().for_each(|(x, c)| {
+            let x = x as i32;
+            let y = y as i32;
+            if c == '^' {
+                pos = Some((x, y));
+                m.insert((x, y), '.');
+            } else {
+                m.insert((x, y), c);
+            }
+            if c == '.' {
+                opens.insert((x, y));
+            }
+        });
+    });
+
+    let mut pos = pos.unwrap();
+    let mut dir = '^';
+    opens
+        .into_iter()
+        .filter(|open| {
+            let mut m = m.clone();
+            m.insert(*open, '#');
+            is_loop(m, pos, dir)
+        })
+        .count()
+}
+
+fn is_loop(m: HashMap<(i32, i32), char>, mut pos: (i32, i32), mut dir: char) -> bool {
+    let mut visited = HashSet::new();
+    while m.contains_key(&pos) {
+        let (x, y) = pos;
+        // println!("at {x},{y} {dir}");
+        if visited.contains(&(pos, dir)) {
+            return true;
+        }
+        visited.insert((pos, dir));
+        let next = match dir {
+            '^' => (x, y - 1),
+            'v' => (x, y + 1),
+            '<' => (x - 1, y),
+            '>' => (x + 1, y),
+            _ => unreachable!(),
+        };
+        if let Some('#') = m.get(&next) {
+            // println!("bump at {x},{y}");
+            dir = match dir {
+                '^' => '>',
+                'v' => '<',
+                '<' => '^',
+                '>' => 'v',
+                _ => unreachable!("asdf"),
+            };
+        } else {
+            pos = next;
+        }
+    }
+    false
 }
 
 #[cfg(test)]
@@ -87,6 +145,6 @@ mod test {
 
     #[test]
     fn test2() {
-        assert_eq!(part2(TEST_INPUT), 0);
+        assert_eq!(part2(TEST_INPUT), 6);
     }
 }
