@@ -11,29 +11,15 @@ pub fn day_main() {
 }
 
 type RiddleResult = usize;
+type Point = (i32, i32);
 
 fn part1(input: &str) -> RiddleResult {
-    let mut m = HashMap::new();
-    let mut pos = None;
-    input.lines().enumerate().for_each(|(y, line)| {
-        line.char_indices().for_each(|(x, c)| {
-            let x = x as i32;
-            let y = y as i32;
-            if c == '^' {
-                pos = Some((x, y));
-                m.insert((x, y), '.');
-            } else {
-                m.insert((x, y), c);
-            }
-        });
-    });
+    let (m, mut pos, _) = parse(input);
 
-    let mut pos = pos.unwrap();
     let mut dir = '^';
     let mut visited = HashSet::new();
     while m.contains_key(&pos) {
         let (x, y) = pos;
-        // println!("at {x},{y} {dir}");
         visited.insert(pos);
         let next = match dir {
             '^' => (x, y - 1),
@@ -43,7 +29,6 @@ fn part1(input: &str) -> RiddleResult {
             _ => unreachable!(),
         };
         if let Some('#') = m.get(&next) {
-            // println!("bump at {x},{y}");
             dir = match dir {
                 '^' => '>',
                 'v' => '<',
@@ -59,6 +44,20 @@ fn part1(input: &str) -> RiddleResult {
 }
 
 fn part2(input: &str) -> RiddleResult {
+    let (m, pos, opens) = parse(input);
+
+    let dir = '^';
+    opens
+        .into_iter()
+        .filter(|open| {
+            let mut m = m.clone();
+            m.insert(*open, '#');
+            is_loop(m, pos, dir)
+        })
+        .count()
+}
+
+fn parse(input: &str) -> (HashMap<Point, char>, Point, HashSet<Point>) {
     let mut m = HashMap::new();
     let mut pos = None;
     let mut opens = HashSet::new();
@@ -77,24 +76,13 @@ fn part2(input: &str) -> RiddleResult {
             }
         });
     });
-
-    let mut pos = pos.unwrap();
-    let mut dir = '^';
-    opens
-        .into_iter()
-        .filter(|open| {
-            let mut m = m.clone();
-            m.insert(*open, '#');
-            is_loop(m, pos, dir)
-        })
-        .count()
+    (m, pos.unwrap(), opens)
 }
 
-fn is_loop(m: HashMap<(i32, i32), char>, mut pos: (i32, i32), mut dir: char) -> bool {
+fn is_loop(m: HashMap<Point, char>, mut pos: Point, mut dir: char) -> bool {
     let mut visited = HashSet::new();
     while m.contains_key(&pos) {
         let (x, y) = pos;
-        // println!("at {x},{y} {dir}");
         if visited.contains(&(pos, dir)) {
             return true;
         }
@@ -107,7 +95,6 @@ fn is_loop(m: HashMap<(i32, i32), char>, mut pos: (i32, i32), mut dir: char) -> 
             _ => unreachable!(),
         };
         if let Some('#') = m.get(&next) {
-            // println!("bump at {x},{y}");
             dir = match dir {
                 '^' => '>',
                 'v' => '<',
