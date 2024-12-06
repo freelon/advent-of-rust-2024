@@ -1,7 +1,4 @@
-use std::{
-    collections::HashSet,
-    fs::read_to_string,
-};
+use std::{collections::HashSet, fs::read_to_string};
 
 use crate::utils::grid::{Coord, Grid};
 

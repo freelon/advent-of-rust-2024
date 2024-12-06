@@ -39,12 +39,22 @@ impl<T> Grid<T> {
         (c.1 * self.content_width + c.0) as usize
     }
 
-    pub fn get(&self, c: Coord) -> &T {
-        &self.content[self.index_of(c)]
+    pub fn get(&self, c: Coord) -> Option<&T> {
+        let index = self.index_of(c);
+        if index < self.content.len() {
+            Some(&self.content[self.index_of(c)])
+        } else {
+            None
+        }
     }
-    pub fn get_mut(&mut self, c: Coord) -> &mut T {
-        let index_of = self.index_of(c);
-        &mut self.content[index_of]
+
+    pub fn get_mut(&mut self, c: Coord) -> Option<&mut T> {
+        let index = self.index_of(c);
+        if index < self.content.len() {
+            Some(&mut self.content[index])
+        } else {
+            None
+        }
     }
 
     pub fn set(&mut self, c: Coord, value: T) {
@@ -90,13 +100,14 @@ impl<T> Index<Coord> for Grid<T> {
 
     #[inline]
     fn index(&self, index: Coord) -> &Self::Output {
-        self.get(index)
+        &self.content[self.index_of(index)]
     }
 }
 
 impl<T> IndexMut<Coord> for Grid<T> {
     fn index_mut(&mut self, index: Coord) -> &mut Self::Output {
-        self.get_mut(index)
+        let index_of = self.index_of(index);
+        &mut self.content[index_of]
     }
 }
 
@@ -115,17 +126,25 @@ mod test {
             ((1, 0), '.'),
             ((1, 1), '#'),
         ]));
-        assert_eq!(&'.', grid.get((0, 0)));
-        assert_eq!(&'.', grid.get((0, 1)));
-        assert_eq!(&'.', grid.get((1, 0)));
-        assert_eq!(&'#', grid.get((1, 1)));
+        assert_eq!('.', grid[(0, 0)]);
+        assert_eq!('.', grid[(0, 1)]);
+        assert_eq!('.', grid[(1, 0)]);
+        assert_eq!('#', grid[(1, 1)]);
     }
 
     #[test]
     fn mutate_by_index() {
         let mut grid = generate();
         grid[(0, 1)] = 'x';
-        assert_eq!(&'x', grid.get((0, 1)));
+        assert_eq!('x', grid[(0, 1)]);
+    }
+    #[test]
+    fn mutate_option() {
+        let mut grid = generate();
+        if let Some(value) = grid.get_mut((0, 1)) {
+            *value = 'x';
+        }
+        assert_eq!('x', grid[(0, 1)]);
     }
 
     fn generate() -> Grid<char> {
@@ -156,5 +175,21 @@ mod test {
             ((1, 1), &'.'),
         ];
         assert_eq!(v, generate().entries().collect_vec());
+    }
+
+    #[should_panic]
+    #[test]
+    fn out_of_bounds_panics() {
+        generate()[(-1, 3)];
+    }
+
+    #[test]
+    fn option_success() {
+        assert_eq!(Some(&'.'), generate().get((0, 0)));
+    }
+
+    #[test]
+    fn option_out_of_bounds() {
+        assert_eq!(None, generate().get((30, 0)));
     }
 }
