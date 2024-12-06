@@ -3,6 +3,8 @@ use std::{
     fs::read_to_string,
 };
 
+use crate::utils::grid::Grid;
+
 pub fn day_main() {
     let input = read_to_string("input/day06.txt").unwrap();
     let input = input.trim();
@@ -11,7 +13,7 @@ pub fn day_main() {
 }
 
 type RiddleResult = usize;
-type Point = (i32, i32);
+type Point = (i64, i64);
 
 fn part1(input: &str) -> RiddleResult {
     let (m, pos) = parse(input);
@@ -21,13 +23,9 @@ fn part1(input: &str) -> RiddleResult {
     visited.len()
 }
 
-fn get_visited(
-    m: &HashMap<(i32, i32), char>,
-    mut pos: (i32, i32),
-    mut dir: char,
-) -> HashSet<(i32, i32)> {
+fn get_visited(m: &Grid<char>, mut pos: Point, mut dir: char) -> HashSet<Point> {
     let mut visited = HashSet::new();
-    while m.contains_key(&pos) {
+    while m.contains_key(pos) {
         let (x, y) = pos;
         visited.insert(pos);
         let next = match dir {
@@ -37,7 +35,7 @@ fn get_visited(
             '>' => (x + 1, y),
             _ => unreachable!(),
         };
-        if let Some('#') = m.get(&next) {
+        if m.contains_key(next) && '#' == m[next] {
             dir = match dir {
                 '^' => '>',
                 'v' => '<',
@@ -62,13 +60,13 @@ fn part2(input: &str) -> RiddleResult {
         .count()
 }
 
-fn parse(input: &str) -> (HashMap<Point, char>, Point) {
+fn parse(input: &str) -> (Grid<char>, Point) {
     let mut m = HashMap::new();
     let mut pos = None;
     input.lines().enumerate().for_each(|(y, line)| {
         line.char_indices().for_each(|(x, c)| {
-            let x = x as i32;
-            let y = y as i32;
+            let x = x as i64;
+            let y = y as i64;
             if c == '^' {
                 pos = Some((x, y));
                 m.insert((x, y), '.');
@@ -77,10 +75,10 @@ fn parse(input: &str) -> (HashMap<Point, char>, Point) {
             }
         });
     });
-    (m, pos.unwrap())
+    (Grid::from(m), pos.unwrap())
 }
 
-fn is_loop(m: &HashMap<Point, char>, block: Point, mut pos: Point, mut dir: char) -> bool {
+fn is_loop(m: &Grid<char>, block: Point, mut pos: Point, mut dir: char) -> bool {
     let mut visited = HashSet::new();
     loop {
         let (x, y) = pos;
@@ -92,10 +90,9 @@ fn is_loop(m: &HashMap<Point, char>, block: Point, mut pos: Point, mut dir: char
             '>' => (x + 1, y),
             _ => unreachable!(),
         };
-        let next_tile = m.get(&next);
-        if None == next_tile {
+        if !m.contains_key(next) {
             return false;
-        } else if next == block || Some(&'#') == next_tile {
+        } else if next == block || '#' == m[next] {
             // we only check for loops on a collision to speed things up
             if visited.contains(&(pos, dir)) {
                 return true;
