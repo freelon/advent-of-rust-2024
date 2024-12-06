@@ -14,9 +14,18 @@ type RiddleResult = usize;
 type Point = (i32, i32);
 
 fn part1(input: &str) -> RiddleResult {
-    let (m, mut pos, _) = parse(input);
+    let (m, pos) = parse(input);
 
-    let mut dir = '^';
+    let dir = '^';
+    let visited = get_visited(&m, pos, dir);
+    visited.len()
+}
+
+fn get_visited(
+    m: &HashMap<(i32, i32), char>,
+    mut pos: (i32, i32),
+    mut dir: char,
+) -> HashSet<(i32, i32)> {
     let mut visited = HashSet::new();
     while m.contains_key(&pos) {
         let (x, y) = pos;
@@ -40,27 +49,22 @@ fn part1(input: &str) -> RiddleResult {
             pos = next;
         }
     }
-    visited.len()
+    visited
 }
 
 fn part2(input: &str) -> RiddleResult {
-    let (m, pos, opens) = parse(input);
+    let (m, pos) = parse(input);
 
     let dir = '^';
-    opens
+    get_visited(&m, pos, dir)
         .into_iter()
-        .filter(|open| {
-            let mut m = m.clone();
-            m.insert(*open, '#');
-            is_loop(m, pos, dir)
-        })
+        .filter(|open| is_loop(&m, *open, pos, dir))
         .count()
 }
 
-fn parse(input: &str) -> (HashMap<Point, char>, Point, HashSet<Point>) {
+fn parse(input: &str) -> (HashMap<Point, char>, Point) {
     let mut m = HashMap::new();
     let mut pos = None;
-    let mut opens = HashSet::new();
     input.lines().enumerate().for_each(|(y, line)| {
         line.char_indices().for_each(|(x, c)| {
             let x = x as i32;
@@ -71,22 +75,16 @@ fn parse(input: &str) -> (HashMap<Point, char>, Point, HashSet<Point>) {
             } else {
                 m.insert((x, y), c);
             }
-            if c == '.' {
-                opens.insert((x, y));
-            }
         });
     });
-    (m, pos.unwrap(), opens)
+    (m, pos.unwrap())
 }
 
-fn is_loop(m: HashMap<Point, char>, mut pos: Point, mut dir: char) -> bool {
+fn is_loop(m: &HashMap<Point, char>, block: Point, mut pos: Point, mut dir: char) -> bool {
     let mut visited = HashSet::new();
     while m.contains_key(&pos) {
         let (x, y) = pos;
-        if visited.contains(&(pos, dir)) {
-            return true;
-        }
-        visited.insert((pos, dir));
+
         let next = match dir {
             '^' => (x, y - 1),
             'v' => (x, y + 1),
@@ -94,7 +92,14 @@ fn is_loop(m: HashMap<Point, char>, mut pos: Point, mut dir: char) -> bool {
             '>' => (x + 1, y),
             _ => unreachable!(),
         };
-        if let Some('#') = m.get(&next) {
+        let blocked = next == block || Some(&'#') == m.get(&next);
+        if blocked {
+            // we only check for loops on a collision to speed things up
+            if visited.contains(&(pos, dir)) {
+                return true;
+            }
+            visited.insert((pos, dir));
+
             dir = match dir {
                 '^' => '>',
                 'v' => '<',
