@@ -82,7 +82,7 @@ fn parse(input: &str) -> (HashMap<Point, char>, Point) {
 
 fn is_loop(m: &HashMap<Point, char>, block: Point, mut pos: Point, mut dir: char) -> bool {
     let mut visited = HashSet::new();
-    while m.contains_key(&pos) {
+    loop {
         let (x, y) = pos;
 
         let next = match dir {
@@ -92,8 +92,10 @@ fn is_loop(m: &HashMap<Point, char>, block: Point, mut pos: Point, mut dir: char
             '>' => (x + 1, y),
             _ => unreachable!(),
         };
-        let blocked = next == block || Some(&'#') == m.get(&next);
-        if blocked {
+        let next_tile = m.get(&next);
+        if None == next_tile {
+            return false;
+        } else if next == block || Some(&'#') == next_tile {
             // we only check for loops on a collision to speed things up
             if visited.contains(&(pos, dir)) {
                 return true;
@@ -111,7 +113,6 @@ fn is_loop(m: &HashMap<Point, char>, block: Point, mut pos: Point, mut dir: char
             pos = next;
         }
     }
-    false
 }
 
 #[cfg(test)]
