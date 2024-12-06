@@ -3,7 +3,7 @@ use std::{
     fs::read_to_string,
 };
 
-use crate::utils::grid::Grid;
+use crate::utils::grid::{Coord, Grid};
 
 pub fn day_main() {
     let input = read_to_string("input/day06.txt").unwrap();
@@ -13,7 +13,6 @@ pub fn day_main() {
 }
 
 type RiddleResult = usize;
-type Point = (i64, i64);
 
 fn part1(input: &str) -> RiddleResult {
     let (m, pos) = parse(input);
@@ -23,7 +22,7 @@ fn part1(input: &str) -> RiddleResult {
     visited.len()
 }
 
-fn get_visited(m: &Grid<char>, mut pos: Point, mut dir: char) -> HashSet<Point> {
+fn get_visited(m: &Grid<char>, mut pos: Coord, mut dir: char) -> HashSet<Coord> {
     let mut visited = HashSet::new();
     while m.contains_key(pos) {
         let (x, y) = pos;
@@ -60,7 +59,7 @@ fn part2(input: &str) -> RiddleResult {
         .count()
 }
 
-fn parse(input: &str) -> (Grid<char>, Point) {
+fn parse(input: &str) -> (Grid<char>, Coord) {
     let mut m = HashMap::new();
     let mut pos = None;
     input.lines().enumerate().for_each(|(y, line)| {
@@ -78,7 +77,7 @@ fn parse(input: &str) -> (Grid<char>, Point) {
     (Grid::from(m), pos.unwrap())
 }
 
-fn is_loop(m: &Grid<char>, block: Point, mut pos: Point, mut dir: char) -> bool {
+fn is_loop(m: &Grid<char>, block: Coord, mut pos: Coord, mut dir: char) -> bool {
     let mut visited = HashSet::new();
     loop {
         let (x, y) = pos;

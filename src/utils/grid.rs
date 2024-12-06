@@ -10,7 +10,7 @@ pub struct Grid<T> {
     content: Vec<T>,
 }
 
-type Coord = (i64, i64);
+pub type Coord = (i64, i64);
 
 impl<T> Grid<T> {
     pub fn from(mut source: HashMap<Coord, T>) -> Grid<T> {
