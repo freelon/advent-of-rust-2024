@@ -1,5 +1,5 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashSet,
     fs::read_to_string,
 };
 
@@ -60,21 +60,10 @@ fn part2(input: &str) -> RiddleResult {
 }
 
 fn parse(input: &str) -> (Grid<char>, Coord) {
-    let mut m = HashMap::new();
-    let mut pos = None;
-    input.lines().enumerate().for_each(|(y, line)| {
-        line.char_indices().for_each(|(x, c)| {
-            let x = x as i64;
-            let y = y as i64;
-            if c == '^' {
-                pos = Some((x, y));
-                m.insert((x, y), '.');
-            } else {
-                m.insert((x, y), c);
-            }
-        });
-    });
-    (Grid::from(m), pos.unwrap())
+    let mut m = Grid::parse(input);
+    let start = m.entries().find(|(_, c)| **c == '^').unwrap().0;
+    m[start] = '.';
+    (m, start)
 }
 
 fn is_loop(m: &Grid<char>, block: Coord, mut pos: Coord, mut dir: char) -> bool {

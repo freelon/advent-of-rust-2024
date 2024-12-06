@@ -108,8 +108,8 @@ mod test {
 
     #[test]
     fn test1() {
-        assert!(valid_book(&vec![97, 5, 13], &HashSet::from([(97, 13)])));
-        assert!(!valid_book(&vec![13, 5, 97], &HashSet::from([(97, 13)])));
+        assert!(valid_book(&[97, 5, 13], &HashSet::from([(97, 13)])));
+        assert!(!valid_book(&[13, 5, 97], &HashSet::from([(97, 13)])));
         assert_eq!(part1(TEST_INPUT), 143);
     }
 

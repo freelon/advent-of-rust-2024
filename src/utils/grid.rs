@@ -4,6 +4,7 @@ use std::{
 };
 
 /// A grid structure, indexed by (x, y) tuples. The top-left coordinate is (0, 0).
+#[derive(Eq, PartialEq, Debug)]
 pub struct Grid<T> {
     content_width: i64,
     content_height: i64,
@@ -54,6 +55,34 @@ impl<T> Grid<T> {
     pub fn contains_key(&self, c: Coord) -> bool {
         0 <= c.0 && c.0 < self.content_width && 0 <= c.1 && c.1 < self.content_height
     }
+
+    pub fn entries(&self) -> impl Iterator<Item = (Coord, &T)> {
+        self.content.iter().enumerate().map(|(i, val)| {
+            (
+                (i as i64 % self.content_width, i as i64 / self.content_width),
+                val,
+            )
+        })
+        // .collect_vec()
+    }
+}
+
+impl Grid<char> {
+    pub fn parse(input: &str) -> Grid<char> {
+        let content_width = input.lines().next().unwrap().len();
+        let mut content_height = 0;
+        let mut content = vec![];
+        for line in input.lines() {
+            content_height += 1;
+            content.reserve(content_width);
+            line.chars().for_each(|v| content.push(v));
+        }
+        Grid {
+            content_width: content_width as i64,
+            content_height,
+            content,
+        }
+    }
 }
 
 impl<T> Index<Coord> for Grid<T> {
@@ -73,9 +102,10 @@ impl<T> IndexMut<Coord> for Grid<T> {
 
 #[cfg(test)]
 mod test {
-    use std::collections::HashMap;
+    use itertools::Itertools;
 
     use super::Grid;
+    use std::collections::HashMap;
 
     #[test]
     fn init_and_read() {
@@ -90,6 +120,7 @@ mod test {
         assert_eq!(&'.', grid.get((1, 0)));
         assert_eq!(&'#', grid.get((1, 1)));
     }
+
     #[test]
     fn mutate_by_index() {
         let mut grid = generate();
@@ -105,5 +136,25 @@ mod test {
             ((1, 1), '.'),
         ]));
         grid
+    }
+
+    #[test]
+    fn from_str() {
+        let s = "..\n.x";
+        let m_str = Grid::parse(s);
+        let mut m_gen = generate();
+        m_gen[(1, 1)] = 'x';
+        assert_eq!(m_gen, m_str);
+    }
+
+    #[test]
+    fn entries() {
+        let v = vec![
+            ((0, 0), &'.'),
+            ((1, 0), &'.'),
+            ((0, 1), &'.'),
+            ((1, 1), &'.'),
+        ];
+        assert_eq!(v, generate().entries().collect_vec());
     }
 }
