@@ -82,21 +82,30 @@ fn well(expected: i64, acc: i64, operands: &[i64]) -> bool {
     if operands.is_empty() {
         return expected == acc;
     }
+    if acc > expected {
+        return false;
+    }
 
     let next = operands[0];
     let remainder = &operands[1..];
 
     let v_mul = acc * next;
     let v_plus = acc + next;
-    let v_concat = format!("{acc}{next}").parse().unwrap();
+    let v_concat = concat(acc, next);
     well(expected, v_mul, remainder)
         || well(expected, v_plus, remainder)
         || well(expected, v_concat, remainder)
 }
 
+fn concat(lhs: i64, rhs: i64) -> i64 {
+    let exp: u32 = (rhs as f64).log10().ceil() as u32;
+    let shift = 10i64.pow(exp);
+    lhs * shift + rhs
+}
+
 #[cfg(test)]
 mod test {
-    use super::{part1, part2};
+    use super::{concat, part1, part2};
 
     const TEST_INPUT: &str = r"190: 10 19
 3267: 81 40 27
@@ -116,5 +125,10 @@ mod test {
     #[test]
     fn test2() {
         assert_eq!(part2(TEST_INPUT), 11387);
+    }
+
+    #[test]
+    fn test_concat() {
+        assert_eq!(1234, concat(12, 34));
     }
 }
