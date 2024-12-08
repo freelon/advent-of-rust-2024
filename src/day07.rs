@@ -98,7 +98,7 @@ fn well(expected: i64, acc: i64, operands: &[i64]) -> bool {
 }
 
 fn concat(lhs: i64, rhs: i64) -> i64 {
-    let exp: u32 = (rhs as f64).log10().ceil() as u32;
+    let exp: u32 = (rhs as f64 + 1.0).log10().ceil() as u32;
     let shift = 10i64.pow(exp);
     lhs * shift + rhs
 }
@@ -130,5 +130,6 @@ mod test {
     #[test]
     fn test_concat() {
         assert_eq!(1234, concat(12, 34));
+        assert_eq!(1210, concat(12, 10));
     }
 }
