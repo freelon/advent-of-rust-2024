@@ -20,7 +20,7 @@ fn part1(input: &str) -> RiddleResult {
         .entries()
         .filter(|(_, c)| **c != '.')
         .into_group_map_by(|(_, c)| *c);
-    for (frequency, coords) in antennas {
+    for (_, coords) in antennas {
         for (a, _) in coords.iter() {
             for (b, _) in coords.iter() {
                 if a == b {
@@ -38,8 +38,43 @@ fn part1(input: &str) -> RiddleResult {
     antinodes.len()
 }
 
-fn part2(_input: &str) -> RiddleResult {
-    0
+fn part2(input: &str) -> RiddleResult {
+    let grid = Grid::parse(input);
+    let mut antinodes = HashSet::new();
+    let antennas = grid
+        .entries()
+        .filter(|(_, c)| **c != '.')
+        .into_group_map_by(|(_, c)| *c);
+    for (_, coords) in antennas {
+        for (a, _) in coords.iter() {
+            for (b, _) in coords.iter() {
+                if a == b {
+                    continue;
+                }
+                antinodes.insert(*a);
+                antinodes.insert(*b);
+                let dx = a.0 - b.0;
+                let dy = a.1 - b.1;
+                for i in 1.. {
+                    let p = (a.0 + i * dx, a.1 + i * dy);
+                    if grid.contains_key(p) {
+                        antinodes.insert(p);
+                    } else {
+                        break;
+                    }
+                }
+                for i in 1.. {
+                    let p = (a.0 - i * dx, a.1 - i * dy);
+                    if grid.contains_key(p) {
+                        antinodes.insert(p);
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    antinodes.len()
 }
 
 #[cfg(test)]
@@ -67,6 +102,6 @@ mod test {
 
     #[test]
     fn test2() {
-        assert_eq!(part2(TEST_INPUT), 0);
+        assert_eq!(part2(TEST_INPUT), 34);
     }
 }
