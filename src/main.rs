@@ -13,6 +13,7 @@ fn main() {
         (6, day06::day_main),
         (7, day07::day_main),
         (8, day08::day_main),
+        (9, day09::day_main),
     ]);
     let day: Option<u8> = args().nth(1).and_then(|a| a.parse().ok());
     let Some(day) = day else {
