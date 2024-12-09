@@ -19,7 +19,7 @@ fn part1(input: &str) -> RiddleResult {
         } else {
             None
         };
-        for j in 0..l {
+        for _ in 0..l {
             disk.push(content);
         }
     }
@@ -52,8 +52,50 @@ fn part1(input: &str) -> RiddleResult {
         .sum()
 }
 
-fn part2(_input: &str) -> RiddleResult {
-    0
+fn part2(input: &str) -> RiddleResult {
+    let mut disk = Vec::with_capacity(input.len() * 10);
+    // (start_index, len, file_id)
+    let mut files: Vec<(usize, u32, usize)> = Vec::with_capacity(input.len() / 2 + 1);
+    for (i, l) in input.chars().enumerate() {
+        let l = l.to_digit(10).unwrap();
+        let content = if i % 2 == 0 {
+            // file
+            Some(i / 2) // id based on order of apperance and every second one is a file
+        } else {
+            None
+        };
+        if i % 2 == 0 {
+            files.push((disk.len(), l, i / 2));
+        }
+        for _ in 0..l {
+            disk.push(content);
+        }
+    }
+    while let Some((start_index, length, file_id)) = files.pop() {
+        let mut seeker = 0;
+        let mut found = None;
+        while disk[seeker] != Some(file_id) {
+            if disk[seeker..seeker + length as usize]
+                .iter()
+                .all(|v| v.is_none())
+            {
+                found = Some(seeker);
+                break;
+            }
+            seeker += 1;
+        }
+        if let Some(empty_start) = found {
+            for i in 0..length as usize {
+                disk[empty_start + i] = Some(file_id);
+                disk[start_index + i] = None;
+            }
+        }
+    }
+
+    disk.into_iter()
+        .enumerate()
+        .map(|(i, v)| if let Some(value) = v { i * value } else { 0 })
+        .sum()
 }
 
 #[cfg(test)]
@@ -69,6 +111,6 @@ mod test {
 
     #[test]
     fn test2() {
-        assert_eq!(part2(TEST_INPUT), 0);
+        assert_eq!(part2(TEST_INPUT), 2858);
     }
 }
