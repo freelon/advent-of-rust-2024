@@ -3,8 +3,10 @@ use std::{
     ops::{Index, IndexMut},
 };
 
+use itertools::Itertools;
+
 /// A grid structure, indexed by (x, y) tuples. The top-left coordinate is (0, 0).
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug, Clone)]
 pub struct Grid<T> {
     pub content_width: i64,
     pub content_height: i64,
@@ -85,10 +87,16 @@ impl<T> Grid<T> {
                 val,
             )
         })
-        // .collect_vec()
     }
 
-    // todo: map from T to U
+    pub fn map_values<U>(self, f: fn(T) -> U) -> Grid<U> {
+        let new_content = self.content.into_iter().map(f).collect_vec();
+        Grid {
+            content_width: self.content_width,
+            content_height: self.content_height,
+            content: new_content,
+        }
+    }
 }
 
 impl Grid<char> {
@@ -193,8 +201,14 @@ mod test {
 
     #[should_panic]
     #[test]
-    fn out_of_bounds_panics() {
+    fn out_of_bounds_panics1() {
         generate()[(-1, 3)];
+    }
+
+    #[should_panic]
+    #[test]
+    fn out_of_bounds_panics2() {
+        generate()[(1, 3)];
     }
 
     #[test]
@@ -205,5 +219,12 @@ mod test {
     #[test]
     fn option_out_of_bounds() {
         assert_eq!(None, generate().get((30, 0)));
+    }
+
+    #[test]
+    fn value_mapping() {
+        let a: Grid<char> = generate();
+        let b: Grid<String> = a.map_values(|old| format!("{old}string"));
+        assert_eq!(".string".to_string(), b[(0, 0)]);
     }
 }
