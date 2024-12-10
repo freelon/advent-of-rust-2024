@@ -1,7 +1,7 @@
 use std::fs::read_to_string;
 
 pub fn day_main() {
-    let input = read_to_string("input/dayXX.txt").unwrap();
+    let input = read_to_string("input/day{{day}}.txt").unwrap();
     let input = input.trim();
     println!(" part1: {}", part1(input));
     println!(" part2: {}", part2(input));
