@@ -17,9 +17,11 @@ pub fn day_main() {
 type RiddleResult = usize;
 
 fn part1(input: &str) -> RiddleResult {
+    solve(input, true)
+}
+
+fn solve(input: &str, visit_once: bool) -> usize {
     let grid = Grid::parse(input);
-    // println!("{grid:?}");
-    // println!("----");
     let m: HashMap<(i64, i64), u32> = HashMap::from_iter(grid.entries().map(|((x, y), c)| {
         (
             (x, y),
@@ -31,7 +33,6 @@ fn part1(input: &str) -> RiddleResult {
         )
     }));
     let grid = Grid::from(m);
-    // println!("{grid:?}");
     let trail_heads = grid.entries().filter(|(_, h)| **h == 0).collect_vec();
     let mut result = 0;
     for (th, th_height) in trail_heads {
@@ -39,14 +40,13 @@ fn part1(input: &str) -> RiddleResult {
         let mut visited = HashSet::new();
         let mut queue = vec![(th, th_height)];
         while let Some((p, h)) = queue.pop() {
-            if visited.contains(&(p, h)) {
+            if visit_once && visited.contains(&(p, h)) {
                 continue;
             }
             visited.insert((p, h));
 
             if *h == 9 {
                 count += 1;
-                // println!("found {p:?}");
                 continue;
             }
 
@@ -61,19 +61,17 @@ fn part1(input: &str) -> RiddleResult {
                 if let Some(nh) = grid.get(next) {
                     if *nh == h + 1 {
                         queue.push((next, nh));
-                        // println!("going from {:?} to {:?}", (p, h), (next, nh));
                     }
                 }
             }
         }
-        // println!("from {th:?} found {count}");
         result += count;
     }
     result
 }
 
-fn part2(_input: &str) -> RiddleResult {
-    0
+fn part2(input: &str) -> RiddleResult {
+    solve(input, false)
 }
 
 #[cfg(test)]
@@ -126,6 +124,18 @@ mod test {
 
     #[test]
     fn test2() {
-        assert_eq!(part2(TEST_INPUT), 0);
+        assert_eq!(
+            part2(
+                r".....0.
+..4321.
+..5..2.
+..6543.
+..7..4.
+..8765.
+..9....
+"
+            ),
+            3
+        );
     }
 }
