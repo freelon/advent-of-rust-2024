@@ -36,11 +36,17 @@ impl<T> Grid<T> {
     }
 
     fn index_of(&self, c: Coord) -> usize {
+        if !self.contains_key(c) {
+            panic!(
+                "point {c:?} out of range (width: {}, height: {})",
+                self.content_width, self.content_height
+            );
+        }
         (c.1 * self.content_width + c.0) as usize
     }
 
     pub fn get(&self, c: Coord) -> Option<&T> {
-        if c.0 < 0 || c.0 >= self.content_width || c.1 < 0 || c.1 >= self.content_height {
+        if !self.contains_key(c) {
             return None;
         }
         let index = self.index_of(c);
@@ -52,6 +58,9 @@ impl<T> Grid<T> {
     }
 
     pub fn get_mut(&mut self, c: Coord) -> Option<&mut T> {
+        if !self.contains_key(c) {
+            return None;
+        }
         let index = self.index_of(c);
         if index < self.content.len() {
             Some(&mut self.content[index])
@@ -78,6 +87,8 @@ impl<T> Grid<T> {
         })
         // .collect_vec()
     }
+
+    // todo: map from T to U
 }
 
 impl Grid<char> {
