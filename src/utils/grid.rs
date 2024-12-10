@@ -6,8 +6,8 @@ use std::{
 /// A grid structure, indexed by (x, y) tuples. The top-left coordinate is (0, 0).
 #[derive(Eq, PartialEq, Debug)]
 pub struct Grid<T> {
-    content_width: i64,
-    content_height: i64,
+    pub content_width: i64,
+    pub content_height: i64,
     content: Vec<T>,
 }
 
@@ -40,6 +40,9 @@ impl<T> Grid<T> {
     }
 
     pub fn get(&self, c: Coord) -> Option<&T> {
+        if c.0 < 0 || c.0 >= self.content_width || c.1 < 0 || c.1 >= self.content_height {
+            return None;
+        }
         let index = self.index_of(c);
         if index < self.content.len() {
             Some(&self.content[self.index_of(c)])
