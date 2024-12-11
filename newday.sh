@@ -16,6 +16,7 @@ if ! [[ "$X" =~ ^[0-9]{2}$ ]]; then
 fi
 
 cp src/template.rs src/day$X.rs
+git add src/day$X.rs
 touch input/day$X.txt
 
 # Define the placeholder you want to replace
