@@ -14,25 +14,23 @@ fn part1(input: &str) -> RiddleResult {
 }
 
 fn solve(input: &str, blinks: i32) -> usize {
-    let mut stones: HashMap<String, usize> = input.split(" ").map(|v| (v.to_string(), 1)).collect();
+    let mut stones: HashMap<usize, usize> =
+        input.split(" ").map(|v| (v.parse().unwrap(), 1)).collect();
     let mut next = HashMap::new();
     for _ in 0..blinks {
         for (k, v) in stones {
-            if k.as_str() == "0" {
-                next.entry("1".to_string())
-                    .and_modify(|count| *count += v)
-                    .or_insert(v);
-            } else if k.len() % 2 == 0 {
-                let (a, b) = k.split_at(k.len() / 2);
-                next.entry(a.to_string())
-                    .and_modify(|count| *count += v)
-                    .or_insert(v);
-                let x = b.parse::<usize>().unwrap().to_string();
-                next.entry(x).and_modify(|count| *count += v).or_insert(v);
+            if k == 0 {
+                next.entry(1).and_modify(|count| *count += v).or_insert(v);
+            } else if (k.ilog10() + 1) % 2 == 0 {
+                let l = (k.ilog10() + 1) / 2;
+                let z: usize = 10usize.pow(l as u32);
+                let a = k / z;
+                let b = k % z;
+                next.entry(a).and_modify(|count| *count += v).or_insert(v);
+                next.entry(b).and_modify(|count| *count += v).or_insert(v);
             } else {
-                let d: usize = k.parse().unwrap();
-                let k_new = d * 2024;
-                next.entry(k_new.to_string())
+                let k_new = k * 2024;
+                next.entry(k_new)
                     .and_modify(|count| *count += v)
                     .or_insert(v);
             }
@@ -49,17 +47,10 @@ fn part2(input: &str) -> RiddleResult {
 
 #[cfg(test)]
 mod test {
-    use super::{part1, part2};
-
-    const TEST_INPUT: &str = r"";
+    use super::part1;
 
     #[test]
     fn test1() {
         assert_eq!(part1("125 17"), 55312);
-    }
-
-    #[test]
-    fn test2() {
-        assert_eq!(part2(TEST_INPUT), 0);
     }
 }
