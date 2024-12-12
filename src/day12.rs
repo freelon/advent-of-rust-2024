@@ -91,8 +91,7 @@ fn sides(group: HashSet<(i64, i64)>) -> RiddleResult {
             .filter(|p| !group.contains(&(p.0 - 1, p.1)))
             .sorted_by_key(|p| p.1)
             .collect_vec();
-        if points.is_empty() {
-        } else {
+        if !points.is_empty() {
             let count = points
                 .into_iter()
                 .tuple_windows()
@@ -106,8 +105,7 @@ fn sides(group: HashSet<(i64, i64)>) -> RiddleResult {
             .filter(|p| !group.contains(&(p.0 + 1, p.1)))
             .sorted_by_key(|p| p.1)
             .collect_vec();
-        if points.is_empty() {
-        } else {
+        if !points.is_empty() {
             let count = points
                 .into_iter()
                 .tuple_windows()
@@ -123,8 +121,7 @@ fn sides(group: HashSet<(i64, i64)>) -> RiddleResult {
             .filter(|p| !group.contains(&(p.0, p.1 - 1)))
             .sorted_by_key(|p| p.0)
             .collect_vec();
-        if points.is_empty() {
-        } else {
+        if !points.is_empty() {
             let count = points
                 .into_iter()
                 .tuple_windows()
@@ -138,8 +135,7 @@ fn sides(group: HashSet<(i64, i64)>) -> RiddleResult {
             .filter(|p| !group.contains(&(p.0, p.1 + 1)))
             .sorted_by_key(|p| p.0)
             .collect_vec();
-        if points.is_empty() {
-        } else {
+        if !points.is_empty() {
             let count = points
                 .into_iter()
                 .tuple_windows()

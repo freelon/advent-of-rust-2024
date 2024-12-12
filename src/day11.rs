@@ -23,7 +23,7 @@ fn solve(input: &str, blinks: i32) -> usize {
                 next.entry(1).and_modify(|count| *count += v).or_insert(v);
             } else if (k.ilog10() + 1) % 2 == 0 {
                 let l = (k.ilog10() + 1) / 2;
-                let z: usize = 10usize.pow(l as u32);
+                let z: usize = 10usize.pow(l);
                 let a = k / z;
                 let b = k % z;
                 next.entry(a).and_modify(|count| *count += v).or_insert(v);
