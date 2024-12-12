@@ -56,12 +56,12 @@ fn part2(input: &str) -> RiddleResult {
         }
         let mut area = 0;
         let mut further = vec![p];
-        let mut group = HashSet::new();
+        let mut convex_corners = 0;
+        let mut concave_corners = 0;
         while let Some(current) = further.pop() {
             if processed.contains(&current) {
                 continue;
             }
-            group.insert(current);
             area += 1;
             for next in NEIGHBORS.iter().map(|d| (current.0 + d.0, current.1 + d.1)) {
                 let next_c = garden.get(next);
@@ -71,88 +71,28 @@ fn part2(input: &str) -> RiddleResult {
                 }
             }
             processed.insert(current);
+            for (da, db) in NEIGHBORS.iter().circular_tuple_windows() {
+                let a = (current.0 + da.0, current.1 + da.1);
+                let b = (current.0 + db.0, current.1 + db.1);
+                if garden.get(a) != Some(c) && garden.get(b) != Some(c) {
+                    convex_corners += 1;
+                } else if garden.get(a) == Some(c)
+                    && garden.get(b) == Some(c)
+                    && garden.get((current.0 + da.0 + db.0, current.1 + da.1 + db.1)) != Some(c)
+                {
+                    concave_corners += 1;
+                }
+            }
         }
-        result += area * sides(group);
+        let var_name = convex_corners + concave_corners;
+        let var_name = area * (var_name);
+        result += var_name;
     }
     result
 }
 
-fn sides(group: HashSet<(i64, i64)>) -> RiddleResult {
-    let x_range = group.iter().min_by_key(|it| it.0).unwrap().0
-        ..=group.iter().max_by_key(|it| it.0).unwrap().0;
-    let y_range = group.iter().min_by_key(|it| it.1).unwrap().1
-        ..=group.iter().max_by_key(|it| it.1).unwrap().1;
-    let mut result = 0;
-    for x in x_range {
-        // 1 for the ending of the last group, +1 for each time a line "stops", e.g. between the current point and next there is a gap
-        let points = group
-            .iter()
-            .filter(|p| p.0 == x)
-            .filter(|p| !group.contains(&(p.0 - 1, p.1)))
-            .sorted_by_key(|p| p.1)
-            .collect_vec();
-        if !points.is_empty() {
-            let count = points
-                .into_iter()
-                .tuple_windows()
-                .filter(|(a, b)| a.1 + 1 != b.1)
-                .count();
-            result += 1 + count;
-        }
-        let points = group
-            .iter()
-            .filter(|p| p.0 == x)
-            .filter(|p| !group.contains(&(p.0 + 1, p.1)))
-            .sorted_by_key(|p| p.1)
-            .collect_vec();
-        if !points.is_empty() {
-            let count = points
-                .into_iter()
-                .tuple_windows()
-                .filter(|(a, b)| a.1 + 1 != b.1)
-                .count();
-            result += 1 + count;
-        }
-    }
-    for y in y_range {
-        let points = group
-            .iter()
-            .filter(|p| p.1 == y)
-            .filter(|p| !group.contains(&(p.0, p.1 - 1)))
-            .sorted_by_key(|p| p.0)
-            .collect_vec();
-        if !points.is_empty() {
-            let count = points
-                .into_iter()
-                .tuple_windows()
-                .filter(|(a, b)| a.0 + 1 != b.0)
-                .count();
-            result += 1 + count;
-        }
-        let points = group
-            .iter()
-            .filter(|p| p.1 == y)
-            .filter(|p| !group.contains(&(p.0, p.1 + 1)))
-            .sorted_by_key(|p| p.0)
-            .collect_vec();
-        if !points.is_empty() {
-            let count = points
-                .into_iter()
-                .tuple_windows()
-                .filter(|(a, b)| a.0 + 1 != b.0)
-                .count();
-            result += 1 + count;
-        }
-    }
-    result as RiddleResult
-}
-
 #[cfg(test)]
 mod test {
-    use std::collections::HashSet;
-
-    use crate::day12::sides;
-
     use super::{part1, part2};
 
     const TEST_INPUT: &str = r"AAAA
@@ -169,17 +109,5 @@ EEEC
     #[test]
     fn test2() {
         assert_eq!(part2(TEST_INPUT), 80);
-    }
-
-    #[test]
-    fn sides_one() {
-        let group = HashSet::from_iter([(3, 5)]);
-        assert_eq!(sides(group), 4);
-    }
-
-    #[test]
-    fn sides_plus() {
-        let group = HashSet::from_iter([(3, 3), (3, 4), (3, 2), (2, 3), (4, 3)]);
-        assert_eq!(sides(group), 12);
     }
 }
