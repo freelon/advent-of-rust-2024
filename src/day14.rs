@@ -10,8 +10,8 @@ use itertools::Itertools;
 pub fn day_main() {
     let input = read_to_string("input/day14.txt").unwrap();
     let input = input.trim();
-    println!(" part1: {}", part1(input)); // 50112000 too low
-    println!(" part2: {}", part2(input));
+    println!(" part1: {}", part1(input));
+    // println!(" part2: {}", part2(input));
 }
 
 type RiddleResult = usize;
@@ -67,6 +67,7 @@ fn parse(input: &str) -> Vec<((i64, i64), (i64, i64))> {
         .collect_vec()
 }
 
+#[allow(unused)]
 fn part2(input: &str) -> RiddleResult {
     let width = 101;
     let height = 103;
