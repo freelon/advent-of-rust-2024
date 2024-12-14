@@ -64,7 +64,7 @@ fn part2(input: &str) -> RiddleResult {
         } else {
             free.insert(head, l);
         }
-        head += l as usize;
+        head += l;
     }
     for file in files.iter_mut().rev() {
         let (start_index, length, _file_id) = *file;
@@ -73,7 +73,7 @@ fn part2(input: &str) -> RiddleResult {
             .take_while(|f| *f.0 < start_index)
             .find(|f| *f.1 >= length);
 
-        if let Some((&free_start, &free_length)) = found.clone() {
+        if let Some((&free_start, &free_length)) = found {
             free.remove(&free_start);
             free.insert(start_index, length);
             file.0 = free_start;

@@ -2,16 +2,17 @@ use std::{
     collections::HashSet,
     fs::read_to_string,
     io::{self, BufRead},
-    ops::Sub,
 };
 
 use itertools::Itertools;
+
+use crate::utils::grid::Grid;
 
 pub fn day_main() {
     let input = read_to_string("input/day14.txt").unwrap();
     let input = input.trim();
     println!(" part1: {}", part1(input));
-    // println!(" part2: {}", part2(input));
+    println!(" part2: {}", part2(input));
 }
 
 type RiddleResult = usize;
@@ -77,22 +78,27 @@ fn part2(input: &str) -> RiddleResult {
         if seen.contains(&robots) {
             panic!("Loop after {second} rounds, but no christmas tree!");
         }
+        let mut grid: Grid<u8> = Grid::from_default(101, 103);
         seen.insert(robots.clone());
         robots.iter_mut().for_each(|((px, py), (vx, vy))| {
             *px = (*px + width + *vx) % width;
             *py = (*py + height + *vy) % height;
+            grid[(*px, *py)] += 1;
+            if let Some(v) = grid.get_mut((*px + 1, *py)) {
+                *v += 1
+            }
+            if let Some(v) = grid.get_mut((*px - 1, *py)) {
+                *v += 1
+            }
+            if let Some(v) = grid.get_mut((*px, *py + 1)) {
+                *v += 1
+            }
+            if let Some(v) = grid.get_mut((*px, *py - 1)) {
+                *v += 1
+            }
         });
 
-        if robots
-            .iter()
-            .filter(|(s, _)| {
-                robots
-                    .iter()
-                    .any(|(t, _)| t != s && (t.0.sub(s.0).abs() + t.1.sub(s.1).abs()) <= 2)
-            })
-            .count()
-            > robots.len() * 70 / 100
-        {
+        if robots.iter().filter(|(s, _)| grid[*s] > 1).count() > robots.len() * 70 / 100 {
             printr(&robots, width, height);
             println!("after {} seconds. Press enter to continue or type 'merry christmas' if you can spot a tree!", second + 1); //+1 because we look at it after they have changed
             let stdin = io::stdin();
@@ -128,8 +134,6 @@ fn printr(robots: &[Robot], width: i64, height: i64) {
 mod test {
     use crate::day14::solve_part1;
 
-    use super::part2;
-
     const TEST_INPUT: &str = r"p=0,4 v=3,-3
 p=6,3 v=-1,-3
 p=10,3 v=-1,2
@@ -147,10 +151,5 @@ p=9,5 v=-3,-3
     #[test]
     fn test1() {
         assert_eq!(solve_part1(TEST_INPUT, 100, 11, 7), 12);
-    }
-
-    #[test]
-    fn test2() {
-        assert_eq!(part2(TEST_INPUT), 0);
     }
 }

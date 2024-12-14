@@ -99,6 +99,21 @@ impl<T> Grid<T> {
     }
 }
 
+impl<T> Grid<T>
+where
+    T: Default,
+{
+    pub fn from_default(width: i64, height: i64) -> Grid<T> {
+        let mut content: Vec<T> = Vec::with_capacity((width * height) as usize);
+        content.resize_with((width * height) as usize, Default::default);
+        Grid {
+            content_width: width,
+            content_height: height,
+            content,
+        }
+    }
+}
+
 impl Grid<char> {
     pub fn parse(input: &str) -> Grid<char> {
         let content_width = input.lines().next().unwrap().len();
