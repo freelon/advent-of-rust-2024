@@ -1,4 +1,6 @@
-use std::fs::read_to_string;
+use std::{collections::BTreeMap, fs::read_to_string};
+
+use itertools::Itertools;
 
 pub fn day_main() {
     let input = read_to_string("input/day09.txt").unwrap();
@@ -53,53 +55,70 @@ fn part1(input: &str) -> RiddleResult {
 }
 
 fn part2(input: &str) -> RiddleResult {
-    let mut disk = Vec::with_capacity(input.len() * 10);
     // (start_index, len, file_id)
-    let mut files: Vec<(usize, u32, usize)> = Vec::with_capacity(input.len() / 2 + 1);
+    let mut free: BTreeMap<usize, usize> = BTreeMap::new();
+    let mut files: Vec<(usize, usize, usize)> = Vec::with_capacity(input.len() / 2 + 1);
+    let mut head = 0;
     for (i, l) in input.chars().enumerate() {
-        let l = l.to_digit(10).unwrap();
-        let content = if i % 2 == 0 {
-            // file
-            Some(i / 2) // id based on order of apperance and every second one is a file
-        } else {
-            None
-        };
+        let l = l.to_digit(10).unwrap() as usize;
         if i % 2 == 0 {
-            files.push((disk.len(), l, i / 2));
+            files.push((head, l, i / 2));
+        } else {
+            free.insert(head, l);
         }
-        for _ in 0..l {
-            disk.push(content);
-        }
+        head += l as usize;
     }
-    while let Some((start_index, length, file_id)) = files.pop() {
-        let mut seeker = 0;
-        let mut found = None;
-        while disk[seeker] != Some(file_id) {
-            if disk[seeker..seeker + length as usize]
-                .iter()
-                .all(|v| v.is_none())
-            {
-                found = Some(seeker);
-                break;
-            }
-            seeker += 1;
-        }
-        if let Some(empty_start) = found {
-            for i in 0..length as usize {
-                disk[empty_start + i] = Some(file_id);
-                disk[start_index + i] = None;
+    for file in files.iter_mut().rev() {
+        let (start_index, length, _file_id) = *file;
+        let found = free.iter().find(|f| *f.1 >= length && *f.0 < start_index);
+
+        if let Some((&free_start, &free_length)) = found.clone() {
+            free.remove(&free_start);
+            free.insert(start_index, length);
+            file.0 = free_start;
+            merge(&mut free, start_index);
+            if length < free_length {
+                free.insert(free_start + length, free_length - length);
             }
         }
     }
 
-    disk.into_iter()
-        .enumerate()
-        .map(|(i, v)| if let Some(value) = v { i * value } else { 0 })
+    files
+        .iter()
+        .map(|(start_index, l, file_id)| {
+            *file_id * (*start_index..start_index + l).sum::<RiddleResult>()
+        })
         .sum()
+}
+
+fn merge(free: &mut BTreeMap<usize, usize>, start_index: usize) {
+    let mut current = start_index;
+    if let Some((&left, &left_length)) = free.range(0..start_index).last() {
+        if left + left_length == start_index {
+            *free.get_mut(&left).unwrap() += free.remove(&start_index).unwrap();
+            current = left;
+        }
+    }
+    if current == *free.last_entry().unwrap().key() {
+        return; // make sure we don't try to access a range starting > max, panics
+    }
+    if let Some((&right, &_right_length)) = free.range(current + 1..).next() {
+        if current + free[&current] == right {
+            *free.get_mut(&current).unwrap() += free.remove(&right).unwrap();
+        }
+    }
+}
+
+fn n(m: usize) -> usize {
+    (m * m - m) / 2
 }
 
 #[cfg(test)]
 mod test {
+    use std::collections::BTreeMap;
+
+    use crate::day09::merge;
+
     use super::{part1, part2};
 
     const TEST_INPUT: &str = r"2333133121414131402";
@@ -112,5 +131,36 @@ mod test {
     #[test]
     fn test2() {
         assert_eq!(part2(TEST_INPUT), 2858);
+    }
+
+    #[test]
+    fn merge_left() {
+        let mut tree = BTreeMap::new();
+        tree.insert(0, 3);
+        tree.insert(3, 5);
+        merge(&mut tree, 3);
+        assert_eq!(tree.len(), 1);
+        assert_eq!(tree[&0], 8);
+    }
+
+    #[test]
+    fn merge_right() {
+        let mut tree = BTreeMap::new();
+        tree.insert(0, 3);
+        tree.insert(3, 5);
+        merge(&mut tree, 0);
+        assert_eq!(tree.len(), 1);
+        assert_eq!(tree[&0], 8);
+    }
+
+    #[test]
+    fn merge_both() {
+        let mut tree = BTreeMap::new();
+        tree.insert(0, 3);
+        tree.insert(3, 5);
+        tree.insert(8, 11);
+        merge(&mut tree, 3);
+        assert_eq!(tree.len(), 1);
+        assert_eq!(tree[&0], 19);
     }
 }
