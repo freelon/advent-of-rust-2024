@@ -45,7 +45,6 @@ fn solve_part1(input: &str, rounds: i64, width: i64, height: i64) -> RiddleResul
         .filter(|&&((px, py), _)| px > width / 2 && py > height / 2)
         .count();
 
-    if upper_left + lower_left == upper_right + lower_right {}
     upper_left * lower_left * upper_right * lower_right
 }
 
@@ -105,7 +104,9 @@ fn part2(input: &str) -> RiddleResult {
     unreachable!()
 }
 
-fn printr(robots: &[((i64, i64), (i64, i64))], width: i64, height: i64) {
+type Robot = ((i64, i64), (i64, i64));
+
+fn printr(robots: &[Robot], width: i64, height: i64) {
     for y in 0..height {
         for x in 0..width {
             let c = robots
