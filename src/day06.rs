@@ -64,7 +64,7 @@ fn parse(input: &str) -> (Grid<char>, Coord) {
 }
 
 fn is_loop(m: &Grid<char>, block: Coord, mut pos: Coord, mut dir: char) -> bool {
-    let mut visited = HashSet::new();
+    let mut visited: Grid<[bool; 5]> = Grid::from_default(m.content_width, m.content_height);
     loop {
         let (x, y) = pos;
 
@@ -79,10 +79,11 @@ fn is_loop(m: &Grid<char>, block: Coord, mut pos: Coord, mut dir: char) -> bool 
             return false;
         } else if next == block || '#' == m[next] {
             // we only check for loops on a collision to speed things up
-            if visited.contains(&(pos, dir)) {
+            // this is our own little hash function to speed things up
+            if visited[pos][dir as usize % 5] {
                 return true;
             }
-            visited.insert((pos, dir));
+            visited[pos][dir as usize % 5] = true;
 
             dir = match dir {
                 '^' => '>',

@@ -69,7 +69,7 @@ fn part2(input: &str) -> i64 {
     let width = 101;
     let height = 103;
     let mut robots = parse(input);
-    let max_seconds = width * height as i64;
+    let max_seconds = width * height;
     for second in 0.. {
         if second > max_seconds {
             panic!("Seen all combinations but no christmas tree. So sad!");

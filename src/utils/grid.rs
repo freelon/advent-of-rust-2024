@@ -89,6 +89,15 @@ impl<T> Grid<T> {
         })
     }
 
+    pub fn entries_mut(&mut self) -> impl Iterator<Item = (Coord, &mut T)> {
+        self.content.iter_mut().enumerate().map(|(i, val)| {
+            (
+                (i as i64 % self.content_width, i as i64 / self.content_width),
+                val,
+            )
+        })
+    }
+
     pub fn map_values<U>(self, f: fn(T) -> U) -> Grid<U> {
         let new_content = self.content.into_iter().map(f).collect_vec();
         Grid {
