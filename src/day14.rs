@@ -1,7 +1,7 @@
 use std::{
     collections::HashSet,
     fs::read_to_string,
-    io::{self, BufRead},
+    // io::{self, BufRead},
 };
 
 use itertools::Itertools;
@@ -99,20 +99,23 @@ fn part2(input: &str) -> RiddleResult {
         });
 
         if robots.iter().filter(|(s, _)| grid[*s] > 1).count() > robots.len() * 70 / 100 {
-            printr(&robots, width, height);
-            println!("after {} seconds. Press enter to continue or type 'merry christmas' if you can spot a tree!", second + 1); //+1 because we look at it after they have changed
-            let stdin = io::stdin();
-            let line = stdin.lock().lines().next().unwrap().unwrap();
-            if line.as_str().eq_ignore_ascii_case("merry christmas") {
-                return second + 1;
-            }
+            // printr(&robots, width, height);
+            // println!("after {} seconds. Press enter to continue or type 'merry christmas' if you can spot a tree!", second + 1); //+1 because we look at it after they have changed
+            return second + 1;
+            // let stdin = io::stdin();
+            // let line = stdin.lock().lines().next().unwrap().unwrap();
+            // if line.as_str().eq_ignore_ascii_case("merry christmas") {
+            // return second + 1;
+            // }
         }
     }
     unreachable!()
 }
 
+#[allow(unused)]
 type Robot = ((i64, i64), (i64, i64));
 
+#[allow(unused)]
 fn printr(robots: &[Robot], width: i64, height: i64) {
     for y in 0..height {
         for x in 0..width {
