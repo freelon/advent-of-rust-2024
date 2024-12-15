@@ -1,8 +1,4 @@
-use std::{
-    collections::HashSet,
-    fs::read_to_string,
-    // io::{self, BufRead},
-};
+use std::fs::read_to_string;
 
 use itertools::Itertools;
 
@@ -69,17 +65,16 @@ fn parse(input: &str) -> Vec<((i64, i64), (i64, i64))> {
 }
 
 #[allow(unused)]
-fn part2(input: &str) -> RiddleResult {
+fn part2(input: &str) -> i64 {
     let width = 101;
     let height = 103;
     let mut robots = parse(input);
-    let mut seen = HashSet::new();
+    let max_seconds = width * height as i64;
     for second in 0.. {
-        if seen.contains(&robots) {
-            panic!("Loop after {second} rounds, but no christmas tree!");
+        if second > max_seconds {
+            panic!("Seen all combinations but no christmas tree. So sad!");
         }
         let mut grid: Grid<u8> = Grid::from_default(101, 103);
-        seen.insert(robots.clone());
         robots.iter_mut().for_each(|((px, py), (vx, vy))| {
             *px = (*px + width + *vx) % width;
             *py = (*py + height + *vy) % height;
