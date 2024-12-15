@@ -130,6 +130,15 @@ impl Grid<char> {
             content,
         }
     }
+
+    pub fn print(&self) {
+        for line in &self.content.iter().chunks(self.content_width as usize) {
+            for c in line.into_iter() {
+                print!("{c}");
+            }
+            println!();
+        }
+    }
 }
 
 impl<T> Index<Coord> for Grid<T> {
