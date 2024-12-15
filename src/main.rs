@@ -19,6 +19,7 @@ fn main() {
         (12, day12::day_main),
         (13, day13::day_main),
         (14, day14::day_main),
+        (15, day15::day_main),
         // PLACEHOLDER
     ]);
     let day: Option<u8> = args().nth(1).and_then(|a| a.parse().ok());
