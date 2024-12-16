@@ -3,6 +3,8 @@ use std::{
     fs::read_to_string,
 };
 
+use itertools::Itertools;
+
 use crate::utils::grid::{Coord, Grid};
 
 pub fn day_main() {
@@ -31,7 +33,7 @@ impl Dir {
     }
 }
 
-struct Step(Coord, Dir, usize);
+struct Step(Coord, Dir, usize, Vec<Coord>);
 
 impl Ord for Step {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
@@ -57,8 +59,8 @@ fn part1(input: &str) -> RiddleResult {
     let end = maze.entries().find(|(_p, c)| **c == 'E').unwrap().0;
     let mut visited = HashMap::<(Coord, Dir), usize>::new();
     let mut stack: BinaryHeap<Step> = BinaryHeap::new();
-    stack.push(Step(start, E, 0));
-    while let Some(Step(np, nd, cost)) = stack.pop() {
+    stack.push(Step(start, E, 0, vec![]));
+    while let Some(Step(np, nd, cost, _)) = stack.pop() {
         if visited.contains_key(&(np, nd)) {
             continue;
         }
@@ -68,7 +70,7 @@ fn part1(input: &str) -> RiddleResult {
         }
         for d in nd.nexts() {
             if !visited.contains_key(&(np, d)) {
-                stack.push(Step(np, d, cost + 1000));
+                stack.push(Step(np, d, cost + 1000, vec![]));
             }
         }
         let forward = match nd {
@@ -78,14 +80,51 @@ fn part1(input: &str) -> RiddleResult {
             W => (np.0 - 1, np.1),
         };
         if maze[forward] != '#' && !visited.contains_key(&(forward, nd)) {
-            stack.push(Step(forward, nd, cost + 1));
+            stack.push(Step(forward, nd, cost + 1, vec![]));
         }
     }
     panic!("no path found")
 }
 
-fn part2(_input: &str) -> RiddleResult {
-    0
+fn part2(input: &str) -> RiddleResult {
+    use Dir::*;
+    let maze = Grid::parse(input);
+    let start = maze.entries().find(|(_p, c)| **c == 'S').unwrap().0;
+    let end = maze.entries().find(|(_p, c)| **c == 'E').unwrap().0;
+    let mut visited = HashMap::<(Coord, Dir), usize>::new();
+    let mut stack: BinaryHeap<Step> = BinaryHeap::new();
+    stack.push(Step(start, E, 0, vec![]));
+
+    let mut best: Option<usize> = None;
+    let mut visited_by_best: Vec<Coord> = vec![start, end];
+    while let Some(Step(np, nd, cost, mut pred)) = stack.pop() {
+        if let Some(b) = best {
+            if b < cost {
+                break; // can't reach the end point with best cost anymore
+            }
+        }
+        visited.insert((np, nd), cost);
+        if np == end {
+            best = Some(cost);
+            visited_by_best.append(&mut pred);
+        }
+        pred.push(np);
+        for d in nd.nexts() {
+            if !visited.contains_key(&(np, d)) {
+                stack.push(Step(np, d, cost + 1000, pred.clone()));
+            }
+        }
+        let forward = match nd {
+            N => (np.0, np.1 - 1),
+            E => (np.0 + 1, np.1),
+            S => (np.0, np.1 + 1),
+            W => (np.0 - 1, np.1),
+        };
+        if maze[forward] != '#' && !visited.contains_key(&(forward, nd)) {
+            stack.push(Step(forward, nd, cost + 1, pred));
+        }
+    }
+    visited_by_best.into_iter().unique().count()
 }
 
 #[cfg(test)]
@@ -116,6 +155,6 @@ mod test {
 
     #[test]
     fn test2() {
-        assert_eq!(part2(TEST_INPUT), 0);
+        assert_eq!(part2(TEST_INPUT), 45);
     }
 }
