@@ -1,4 +1,7 @@
-use std::{collections::HashSet, fs::read_to_string};
+use std::{
+    collections::{HashMap, HashSet},
+    fs::read_to_string,
+};
 
 pub fn day_main() {
     let input = read_to_string("input/day19.txt").unwrap();
@@ -29,15 +32,37 @@ fn possible(line: &str, towels: &HashSet<&str>) -> bool {
     false
 }
 
-fn part2(_input: &str) -> RiddleResult {
-    0
+fn countp<'a>(
+    line: &'a str,
+    towels: &HashSet<&str>,
+    solved: &mut HashMap<&'a str, usize>,
+) -> usize {
+    if line.is_empty() {
+        return 1;
+    }
+    if let Some(count) = solved.get(line) {
+        return *count;
+    }
+    let mut summed = 0;
+    for t in towels.iter() {
+        if let Some(suffix) = line.strip_prefix(t) {
+            summed += countp(suffix, towels, solved);
+        }
+    }
+    solved.insert(line, summed);
+    summed
+}
+fn part2(input: &str) -> RiddleResult {
+    let (a, b) = input.split_once("\n\n").unwrap();
+    let towels: HashSet<&str> = a.split(", ").collect();
+    b.lines()
+        .map(|line| countp(line, &towels, &mut HashMap::new()))
+        .sum()
 }
 
 #[cfg(test)]
 mod test {
     use std::collections::HashSet;
-
-    use regex::bytes::SetMatchesIntoIter;
 
     use crate::day19::possible;
 
@@ -68,6 +93,6 @@ bbrgwb
 
     #[test]
     fn test2() {
-        assert_eq!(part2(TEST_INPUT), 0);
+        assert_eq!(part2(TEST_INPUT), 16);
     }
 }
