@@ -7,10 +7,6 @@ with open('input/day18.txt', 'r') as f:
 
 
 points = parse_input(data.strip().split('\n'))
-points = set(points[:1024])
-start = (0, 0)
-goal = (70, 70)
-w = 70
 
 # points = set([
 #     (5, 4),
@@ -42,24 +38,30 @@ w = 70
 # goal = (6, 6)
 # w = 6
 
-visited = dict()
-stack = [(0, 0, 0)]
-while len(stack) > 0:
-    # (x, y, c) = stack.pop(len(stack)-1)
-    (x, y, c) = stack.pop(0)
-    print("took " + str((x, y, c)))
-    if (x, y) == goal:
-        print(c)
+
+def sp(points, w):
+    visited = dict()
+    stack = [(0, 0, 0)]
+    while len(stack) > 0:
+        (x, y, c) = stack.pop(0)
+        if (x, y) == (w, w):
+            return c
+
+        if (x, y) in visited:
+            continue
+        visited[(x, y)] = c
+
+        for (a, b) in [(x+nx, y+ny) for (nx, ny) in [(0, 1), (1, 0), (0, -1), (-1, 0)]]:
+            if 0 <= a <= w and 0 <= b <= w and (a, b) not in points:
+                stack.append((a, b, c + 1))
+
+    return None
+
+
+print("task 1: " + str(sp(set(points[:1024]), 70)))
+
+for take in range(1024, len(points)):
+    solution = sp(set(points[:take]), 70)
+    if not solution:
+        print("task 2: " + str(points[take - 1]))
         break
-
-    if (x, y) in visited:
-        continue
-    visited[(x, y)] = c
-
-    for (a, b) in [(x+nx, y+ny) for (nx, ny) in [(0, 1), (1, 0), (0, -1), (-1, 0)]]:
-        print("checking " + str((a, b)))
-        if 0 <= a <= w and 0 <= b <= w and (a, b) not in points:
-            stack.append((a, b, c + 1))
-            print("added something")
-
-# 2224 too high
