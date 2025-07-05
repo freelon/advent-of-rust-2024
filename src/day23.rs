@@ -1,0 +1,102 @@
+use std::{
+    collections::{HashMap, HashSet},
+    fs::read_to_string,
+};
+
+use itertools::Itertools;
+
+pub fn day_main() {
+    let input = read_to_string("input/day23.txt").unwrap();
+    let input = input.trim();
+    println!(" part1: {}", part1(input));
+    println!(" part2: {}", part2(input));
+}
+
+type RiddleResult = usize;
+
+fn part1(input: &str) -> RiddleResult {
+    let mut neighbours: HashMap<&str, HashSet<&str>> = HashMap::new();
+    input.lines().for_each(|line| {
+        let (a, b) = line.split_once("-").unwrap();
+        neighbours
+            .entry(a)
+            .and_modify(|list| {
+                list.insert(b);
+            })
+            .or_insert_with(|| HashSet::from([b]));
+        neighbours
+            .entry(b)
+            .and_modify(|list| {
+                list.insert(a);
+            })
+            .or_insert_with(|| HashSet::from([a]));
+    });
+    let mut sets = vec![];
+    for a in neighbours.keys() {
+        for b in &neighbours[a] {
+            let common = neighbours[a].intersection(&neighbours[b]);
+            for c in common {
+                let mut v = vec![a, b, c];
+                v.sort_unstable();
+                sets.push(v);
+            }
+        }
+    }
+    let sets = sets.iter().unique().collect_vec();
+    dbg!(sets.len());
+    sets.iter()
+        .filter(|set| set.iter().any(|t| t.starts_with("t")))
+        .count()
+}
+
+fn part2(_input: &str) -> RiddleResult {
+    0
+}
+
+#[cfg(test)]
+mod test {
+    use super::{part1, part2};
+
+    const TEST_INPUT: &str = r"kh-tc
+qp-kh
+de-cg
+ka-co
+yn-aq
+qp-ub
+cg-tb
+vc-aq
+tb-ka
+wh-tc
+yn-cg
+kh-ub
+ta-co
+de-co
+tc-td
+tb-wq
+wh-td
+ta-ka
+td-qp
+aq-cg
+wq-ub
+ub-vc
+de-ta
+wq-aq
+wq-vc
+wh-yn
+ka-de
+kh-ta
+co-tc
+wh-qp
+tb-vc
+td-yn";
+
+    #[test]
+    fn test1() {
+        assert_eq!(part1(TEST_INPUT), 7);
+    }
+
+    #[test]
+    fn test2() {
+        assert_eq!(part2(TEST_INPUT), 0);
+    }
+}
