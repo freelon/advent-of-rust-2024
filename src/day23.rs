@@ -15,22 +15,7 @@ pub fn day_main() {
 type RiddleResult = usize;
 
 fn part1(input: &str) -> RiddleResult {
-    let mut neighbours: HashMap<&str, HashSet<&str>> = HashMap::new();
-    input.lines().for_each(|line| {
-        let (a, b) = line.split_once("-").unwrap();
-        neighbours
-            .entry(a)
-            .and_modify(|list| {
-                list.insert(b);
-            })
-            .or_insert_with(|| HashSet::from([b]));
-        neighbours
-            .entry(b)
-            .and_modify(|list| {
-                list.insert(a);
-            })
-            .or_insert_with(|| HashSet::from([a]));
-    });
+    let neighbours = make_graph(input);
     let mut sets = vec![];
     for a in neighbours.keys() {
         for b in &neighbours[a] {
@@ -49,8 +34,69 @@ fn part1(input: &str) -> RiddleResult {
         .count()
 }
 
-fn part2(_input: &str) -> RiddleResult {
-    0
+fn make_graph(input: &str) -> HashMap<&str, HashSet<&str>> {
+    let mut neighbours: HashMap<&str, HashSet<&str>> = HashMap::new();
+    input.lines().for_each(|line| {
+        let (a, b) = line.split_once("-").unwrap();
+        neighbours
+            .entry(a)
+            .and_modify(|list| {
+                list.insert(b);
+            })
+            .or_insert_with(|| HashSet::from([b]));
+        neighbours
+            .entry(b)
+            .and_modify(|list| {
+                list.insert(a);
+            })
+            .or_insert_with(|| HashSet::from([a]));
+    });
+    neighbours
+}
+
+fn part2(input: &str) -> String {
+    let graph = make_graph(input);
+
+    let mut best = "".to_string();
+    for a in graph.keys() {
+        let mut edge_counts = HashMap::<&str, u32>::new();
+        for b in &graph[a] {
+            edge_counts.entry(b).and_modify(|v| *v += 1).or_insert(1);
+            for c in &graph[b] {
+                edge_counts.entry(c).and_modify(|v| *v += 1).or_insert(1);
+            }
+        }
+        // now we have all counts for shared edges
+        // next, we find the highest number k for which there are k nodes which are connected to at least k other nodes
+        let mut k = *edge_counts.values().max().unwrap();
+        while k > 0 {
+            let nodes = edge_counts
+                .iter()
+                .filter(|(_, v)| **v >= k)
+                .map(|(k, _)| k)
+                .collect_vec();
+
+            if nodes.len() < k as usize {
+                k -= 1;
+                continue;
+            }
+
+            // now we find all nodes in the neighborhood of a (including a) that have an edge to every node in `nodes`, excluding themselves ofc
+            let found = graph[a]
+                .iter()
+                .chain([*a].iter())
+                .filter(|x| nodes.iter().all(|y| y == x || graph[*x].contains(*y)))
+                .sorted_unstable()
+                .join(",");
+
+            if found.len() > best.len() {
+                best = found;
+            }
+            break;
+        }
+    }
+
+    best
 }
 
 #[cfg(test)]
@@ -97,6 +143,6 @@ td-yn";
 
     #[test]
     fn test2() {
-        assert_eq!(part2(TEST_INPUT), 0);
+        assert_eq!(part2(TEST_INPUT), "co,de,ka,ta");
     }
 }
