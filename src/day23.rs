@@ -76,18 +76,21 @@ fn part2(input: &str) -> String {
                 .map(|(k, _)| k)
                 .collect_vec();
 
-            if nodes.len() < k as usize {
+            if nodes.len() < (k + 1) as usize {
                 k -= 1;
                 continue;
             }
 
-            // now we find all nodes in the neighborhood of a (including a) that have an edge to every node in `nodes`, excluding themselves ofc
-            let found = graph[a]
+            // now we check if indeed all of the candidate nodes are connected
+            let found = nodes
                 .iter()
-                .chain([*a].iter())
-                .filter(|x| nodes.iter().all(|y| y == x || graph[*x].contains(*y)))
+                .filter(|&x| nodes.iter().all(|y| y == x || graph[*x].contains(*y)))
                 .sorted_unstable()
                 .join(",");
+            // disclaimer: this works for this input but not in general (think of a graph where a is in the middle and the other nodes in
+            // a circle around it, each connected to their left and right neighbour. There could be 10 nodes with degree 3 in there
+            // but ofc they wouldn't be all connected - so this "solution" would return nothing, althoug a max clique of
+            // size 3 would exist)
 
             if found.len() > best.len() {
                 best = found;
