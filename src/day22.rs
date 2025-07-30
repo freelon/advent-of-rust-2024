@@ -1,4 +1,8 @@
-use std::{collections::HashSet, fs::read_to_string, ops::BitXor};
+use std::{
+    collections::{HashMap, HashSet},
+    fs::read_to_string,
+    ops::BitXor,
+};
 
 use itertools::Itertools;
 
@@ -45,7 +49,27 @@ fn part2(input: &str) -> RiddleResult {
         .map(|s| generate(s))
         .collect_vec();
 
-    let all_quadruples = sequences(&deltas);
+    let best = deltas
+        .iter()
+        .map(|monkey| {
+            let mut result: HashMap<(i64, i64, i64, i64), i64> = HashMap::new();
+
+            for (a, b, c, d) in monkey.iter().tuple_windows() {
+                let t = (a.delta, b.delta, c.delta, d.delta);
+                if !result.contains_key(&t) {
+                    result.insert(t, d.price);
+                }
+            }
+            result
+        })
+        .collect_vec();
+
+    let mut all_quadruples = HashSet::new();
+    for map in &best {
+        for &seq in map.keys() {
+            all_quadruples.insert(seq);
+        }
+    }
     println!(
         "we have {} different sequences to check",
         all_quadruples.len()
@@ -59,34 +83,12 @@ fn part2(input: &str) -> RiddleResult {
                 println!("{n}");
             }
 
-            deltas
-                .iter()
-                .map(|monkey| find_first(seq, monkey))
-                .flat_map(|first| first.map(|f| f.3.price).or(Some(0)))
+            best.iter()
+                .map(|monkey_best| monkey_best.get(&seq).unwrap_or(&0))
                 .sum()
         })
         .max()
         .unwrap()
-}
-
-fn sequences(deltas: &Vec<Vec<Foo>>) -> HashSet<(i64, i64, i64, i64)> {
-    let mut all_quadruples = HashSet::new();
-    for monkey in deltas {
-        monkey
-            .iter()
-            .skip(1)
-            .tuple_windows()
-            .for_each(|(a, b, c, d)| {
-                all_quadruples.insert((a.delta, b.delta, c.delta, d.delta));
-            });
-    }
-    all_quadruples
-}
-
-fn find_first(seq: (i64, i64, i64, i64), monkey: &Vec<Foo>) -> Option<(&Foo, &Foo, &Foo, &Foo)> {
-    monkey.iter().tuple_windows().find(|(a, b, c, d)| {
-        a.delta == seq.0 && b.delta == seq.1 && c.delta == seq.2 && d.delta == seq.3
-    })
 }
 
 fn generate(start: i64) -> Vec<Foo> {
@@ -143,19 +145,5 @@ mod test {
 2024
         ";
         assert_eq!(part2(input), 23);
-    }
-
-    #[test]
-    fn finds_first() {
-        let monkey = generate(123);
-        let f = find_first((-1, -1, 0, 2), &monkey);
-        assert_eq!(
-            &Foo {
-                secret: 12683156,
-                price: 6,
-                delta: 2,
-            },
-            f.unwrap().3
-        );
     }
 }
