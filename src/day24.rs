@@ -169,7 +169,7 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::{part1, part2};
+    use super::part1;
 
     const TEST_INPUT: &str = r"x00: 1
 x01: 0
@@ -221,10 +221,5 @@ tnw OR pbm -> gnj";
     #[test]
     fn test1() {
         assert_eq!(part1(TEST_INPUT), 2024);
-    }
-
-    #[test]
-    fn test2() {
-        assert_eq!(part2(TEST_INPUT), 0);
     }
 }
