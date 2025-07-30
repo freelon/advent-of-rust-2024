@@ -49,46 +49,23 @@ fn part2(input: &str) -> RiddleResult {
         .map(|s| generate(s))
         .collect_vec();
 
-    let best = deltas
-        .iter()
-        .map(|monkey| {
-            let mut result: HashMap<(i64, i64, i64, i64), i64> = HashMap::new();
+    let mut best = HashMap::new();
+    deltas.into_iter().for_each(|monkey| {
+        let mut seen = HashSet::new();
 
-            for (a, b, c, d) in monkey.iter().tuple_windows() {
-                let t = (a.delta, b.delta, c.delta, d.delta);
-                if !result.contains_key(&t) {
-                    result.insert(t, d.price);
+        for (a, b, c, d) in monkey.iter().tuple_windows() {
+            let t = (a.delta, b.delta, c.delta, d.delta);
+            if !seen.contains(&t) {
+                seen.insert(t);
+                if !best.contains_key(&t) {
+                    best.insert(t, 0);
                 }
+                best.entry(t).and_modify(|v| *v += d.price);
             }
-            result
-        })
-        .collect_vec();
-
-    let mut all_quadruples = HashSet::new();
-    for map in &best {
-        for &seq in map.keys() {
-            all_quadruples.insert(seq);
         }
-    }
-    println!(
-        "we have {} different sequences to check",
-        all_quadruples.len()
-    );
+    });
 
-    all_quadruples
-        .into_iter()
-        .enumerate()
-        .map(|(n, seq)| {
-            if n % 100 == 0 {
-                println!("{n}");
-            }
-
-            best.iter()
-                .map(|monkey_best| monkey_best.get(&seq).unwrap_or(&0))
-                .sum()
-        })
-        .max()
-        .unwrap()
+    best.into_values().max().unwrap()
 }
 
 fn generate(start: i64) -> Vec<Foo> {
