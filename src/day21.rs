@@ -12,7 +12,7 @@ pub fn day_main() {
 type RiddleResult = i64;
 
 fn part1(input: &str) -> RiddleResult {
-    let p = Precomputed::new(2);
+    let mut p = Precomputed::new(2);
     input
         .lines()
         .map(|line| p.shortest(line) * value(line))
@@ -23,14 +23,19 @@ fn value(line: &str) -> i64 {
     line[0..3].parse::<i64>().unwrap()
 }
 
-fn part2(_input: &str) -> RiddleResult {
-    0
+fn part2(input: &str) -> RiddleResult {
+    let mut p = Precomputed::new(25);
+    input
+        .lines()
+        .map(|line| p.shortest(line) * value(line))
+        .sum()
 }
 
 struct Precomputed {
     num_sp: HashMap<(char, char), Vec<&'static str>>,
     arrow_sp: HashMap<(char, char), Vec<&'static str>>,
     robot_layers: i64,
+    cache: HashMap<(char, char, i64), i64>,
 }
 
 impl Precomputed {
@@ -41,10 +46,11 @@ impl Precomputed {
             num_sp,
             arrow_sp,
             robot_layers,
+            cache: HashMap::new(),
         }
     }
 
-    fn shortest(&self, digit_pad: &str) -> RiddleResult {
+    fn shortest(&mut self, digit_pad: &str) -> RiddleResult {
         format!("A{digit_pad}")
             .chars()
             .tuple_windows()
@@ -53,6 +59,7 @@ impl Precomputed {
                     .num_sp
                     .get(&(a, b))
                     .unwrap()
+                    .clone()
                     .iter()
                     .map(|sp| format!("A{sp}A")) // we add the A in the next layer at the end of each sequence
                     .map(|sp| {
@@ -76,12 +83,15 @@ impl Precomputed {
             .sum()
     }
 
-    fn get(&self, a: char, b: char, n: i64) -> i64 {
+    fn get(&mut self, a: char, b: char, n: i64) -> i64 {
         if n == 0 {
             return 1;
         }
-        let paths = self.arrow_sp.get(&(a, b)).unwrap();
-        paths
+        if let Some(result) = self.cache.get(&(a, b, n)) {
+            return *result;
+        }
+        let paths = self.arrow_sp.get(&(a, b)).unwrap().clone();
+        let result = paths
             .iter()
             .map(|sp| format!("A{sp}A"))
             .map(|sp| {
@@ -100,7 +110,9 @@ impl Precomputed {
                 x
             })
             .min()
-            .unwrap()
+            .unwrap();
+        self.cache.insert((a, b, n), result);
+        result
     }
 }
 
