@@ -23,6 +23,7 @@ fn main() {
         (16, day16::day_main),
         (17, day17::day_main),
         (19, day19::day_main),
+        (21, day21::day_main),
         (22, day22::day_main),
         (23, day23::day_main),
         (23, day23::day_main),
