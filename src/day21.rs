@@ -276,19 +276,19 @@ mod test {
 
     #[test]
     fn shortest_human() {
-        let precomputed = Precomputed::new(2);
+        let mut precomputed = Precomputed::new(2);
         assert_eq!(precomputed.get('<', '^', 0), 1);
     }
 
     #[test]
     fn shortest_1st() {
-        let p = Precomputed::new(2);
+        let mut p = Precomputed::new(2);
         assert_eq!(p.get('A', '^', 1), 2);
     }
 
     #[test]
     fn shortest_2nd() {
-        let p = Precomputed::new(2);
+        let mut p = Precomputed::new(2);
         assert_eq!(p.get('A', '^', 2), 8);
     }
 
