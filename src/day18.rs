@@ -84,7 +84,10 @@ fn solve2(input: &str, fixed: usize, max_coord: i32) -> String {
         let r = sp(&points[..i], max_coord);
         if l.is_some() && r.is_none() {
             #[cfg(debug_assertions)]
-            dbg!(loops);
+            {
+                let iters_needed = i - fixed;
+                dbg!(loops, iters_needed);
+            }
             return format!("{},{}", points[i - 1].0, points[i - 1].1);
         }
         if l.is_some() {

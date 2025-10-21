@@ -28,7 +28,6 @@ fn part1(input: &str) -> RiddleResult {
         }
     }
     let sets = sets.iter().unique().collect_vec();
-    dbg!(sets.len());
     sets.iter()
         .filter(|set| set.iter().any(|t| t.starts_with("t")))
         .count()
