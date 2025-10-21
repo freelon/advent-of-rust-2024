@@ -1,9 +1,8 @@
-use std::{
-    collections::{HashMap, HashSet, VecDeque},
-    fs::read_to_string,
-};
+use std::{collections::VecDeque, fs::read_to_string};
 
 use itertools::Itertools;
+
+use crate::utils::grid::Grid;
 
 pub fn day_main() {
     let input = read_to_string("input/day18.txt").unwrap();
@@ -18,30 +17,33 @@ fn part1(input: &str) -> RiddleResult {
     solve1(input, 1024, 70)
 }
 
-fn solve1(input: &str, n: usize, coord_max: i32) -> usize {
+fn solve1(input: &str, n: usize, coord_max: i64) -> usize {
     let points = parse(input);
     sp(&points[..n], coord_max).unwrap()
 }
 
-fn sp(points: &[(i32, i32)], coord_max: i32) -> Option<usize> {
-    let pointss: HashSet<&(i32, i32)> = HashSet::from_iter(points);
-    let mut visited = HashMap::new();
+fn sp(points: &[(i64, i64)], coord_max: i64) -> Option<usize> {
+    let mut pcheck = Grid::from_default(coord_max + 1, coord_max + 1);
+    for p in points {
+        pcheck.set(*p, true);
+    }
+    let mut visited = Grid::from_default(coord_max + 1, coord_max + 1);
     let mut queue = VecDeque::from_iter([(0, 0, 0)]);
     while let Some((x, y, c)) = queue.pop_front() {
         if x == coord_max && y == coord_max {
             return Some(c);
         }
 
-        if visited.contains_key(&(x, y)) {
+        if visited.get((x, y)) == Some(&true) {
             continue;
         }
-        visited.insert((x, y), c);
+        visited.set((x, y), true);
 
         for (dx, dy) in [(0, 1), (1, 0), (0, -1), (-1, 0)] {
             let (a, b) = (x + dx, y + dy);
             if (0..=coord_max).contains(&a)
                 && (0..=coord_max).contains(&b)
-                && !pointss.contains(&(a, b))
+                && pcheck.get((a, b)) == Some(&false)
             {
                 queue.push_back((a, b, c + 1));
             }
@@ -50,7 +52,7 @@ fn sp(points: &[(i32, i32)], coord_max: i32) -> Option<usize> {
     None
 }
 
-fn parse(input: &str) -> Vec<(i32, i32)> {
+fn parse(input: &str) -> Vec<(i64, i64)> {
     input
         .trim()
         .lines()
@@ -67,7 +69,7 @@ fn part2(input: &str) -> String {
     solve2(input, 1024, 70)
 }
 
-fn solve2(input: &str, fixed: usize, max_coord: i32) -> String {
+fn solve2(input: &str, fixed: usize, max_coord: i64) -> String {
     let points = parse(input);
 
     // we want the first point with which there is no shortest path
