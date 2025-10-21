@@ -22,6 +22,7 @@ fn main() {
         (15, day15::day_main),
         (16, day16::day_main),
         (17, day17::day_main),
+        (18, day18::day_main),
         (19, day19::day_main),
         (21, day21::day_main),
         (22, day22::day_main),
@@ -29,17 +30,20 @@ fn main() {
         (23, day23::day_main),
         (24, day24::day_main),
         (25, day25::day_main),
-        (18, day18::day_main),
         // PLACEHOLDER
     ]);
     let day: Option<u8> = args().nth(1).and_then(|a| a.parse().ok());
     let Some(day) = day else {
+        let start = Instant::now();
         mains
             .iter()
             .sorted_by_key(|entry| entry.0)
             .for_each(|(d, f)| {
                 run(*d, f);
             });
+        let duration = start.elapsed();
+        println!();
+        println!("{COLOR}{ITALIC}All tasks took {duration:?}{RESET_FORMATTING}");
         return;
     };
 
