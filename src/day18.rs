@@ -69,12 +69,34 @@ fn part2(input: &str) -> String {
 
 fn solve2(input: &str, fixed: usize, max_coord: i32) -> String {
     let points = parse(input);
-    for i in fixed..points.len() {
-        if let None = sp(&points[..=i], max_coord) {
-            return format!("{},{}", points[i].0, points[i].1);
+
+    // we want the first point with which there is no shortest path
+    let mut i = fixed;
+    let mut jump = (points.len() - fixed) / 2;
+    #[cfg(debug_assertions)]
+    let mut loops = 0;
+    loop {
+        #[cfg(debug_assertions)]
+        {
+            loops += 1;
+        }
+        let l = sp(&points[..i - 1], max_coord);
+        let r = sp(&points[..i], max_coord);
+        if l.is_some() && r.is_none() {
+            #[cfg(debug_assertions)]
+            dbg!(loops);
+            return format!("{},{}", points[i - 1].0, points[i - 1].1);
+        }
+        if l.is_some() {
+            i += jump;
+        } else {
+            i -= jump;
+        }
+        jump /= 2;
+        if jump == 0 {
+            jump += 1;
         }
     }
-    unreachable!()
 }
 
 #[cfg(test)]
